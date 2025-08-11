@@ -8,8 +8,9 @@ import {
   Alert,
   Switch
 } from 'react-native';
-import AsyncStorage from 'react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CONFIG } from '../config/config';
+import DemoModeToggle from '../components/DemoModeToggle';
 
 const SettingsScreen = ({ navigation }) => {
   const [userSettings, setUserSettings] = useState({
@@ -21,6 +22,7 @@ const SettingsScreen = ({ navigation }) => {
     weatherAlerts: true,
     autoRecommendation: true
   });
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   useEffect(() => {
     loadUserSettings();
@@ -281,6 +283,19 @@ const SettingsScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
+      {/* 개발자 도구 섹션 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>🛠️ 개발자 도구</Text>
+        
+        <TouchableOpacity
+          style={styles.settingItem}
+          onPress={() => setShowDemoModal(true)}
+        >
+          <Text style={styles.settingLabel}>데모 모드 설정</Text>
+          <Text style={styles.settingArrow}>〉</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* 데이터 관리 섹션 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>🗂️ 데이터 관리</Text>
@@ -296,6 +311,13 @@ const SettingsScreen = ({ navigation }) => {
       {/* 하단 여백 */}
       <View style={styles.bottomPadding} />
     </ScrollView>
+    
+    {/* 데모 모드 토글 모달 */}
+    <DemoModeToggle
+      visible={showDemoModal}
+      onClose={() => setShowDemoModal(false)}
+    />
+  </View>
   );
 };
 

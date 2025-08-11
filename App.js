@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +8,8 @@ import { Text } from 'react-native';
 import HomeScreen from './src/screens/HomeScreen';
 import ScheduleScreen from './src/screens/ScheduleScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import ErrorBoundary from './src/components/ErrorBoundary';
+import CustomSplashScreen from './src/components/SplashScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,47 +34,59 @@ function TabIcon({ focused, name }) {
 }
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleSplashFinish = () => {
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return <CustomSplashScreen onFinish={handleSplashFinish} />;
+  }
+
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            headerShown: false,
-            tabBarIcon: ({ focused }) => TabIcon({ focused, name: route.name }),
-            tabBarActiveTintColor: '#4299e1',
-            tabBarInactiveTintColor: '#a0aec0',
-            tabBarStyle: {
-              backgroundColor: 'white',
-              borderTopWidth: 1,
-              borderTopColor: '#e2e8f0',
-              paddingTop: 5,
-              paddingBottom: 5,
-              height: 60,
-            },
-            tabBarLabelStyle: {
-              fontSize: 12,
-              fontWeight: 'bold',
-            },
-          })}
-        >
-          <Tab.Screen 
-            name="Home" 
-            component={HomeScreen}
-            options={{ title: '홈' }}
-          />
-          <Tab.Screen 
-            name="Schedule" 
-            component={ScheduleScreen}
-            options={{ title: '일정' }}
-          />
-          <Tab.Screen 
-            name="Settings" 
-            component={SettingsScreen}
-            options={{ title: '설정' }}
-          />
-        </Tab.Navigator>
-        <StatusBar style="light" backgroundColor="#2d3748" />
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarIcon: ({ focused }) => TabIcon({ focused, name: route.name }),
+              tabBarActiveTintColor: '#4299e1',
+              tabBarInactiveTintColor: '#a0aec0',
+              tabBarStyle: {
+                backgroundColor: 'white',
+                borderTopWidth: 1,
+                borderTopColor: '#e2e8f0',
+                paddingTop: 5,
+                paddingBottom: 5,
+                height: 60,
+              },
+              tabBarLabelStyle: {
+                fontSize: 12,
+                fontWeight: 'bold',
+              },
+            })}
+          >
+            <Tab.Screen 
+              name="Home" 
+              component={HomeScreen}
+              options={{ title: '홈' }}
+            />
+            <Tab.Screen 
+              name="Schedule" 
+              component={ScheduleScreen}
+              options={{ title: '일정' }}
+            />
+            <Tab.Screen 
+              name="Settings" 
+              component={SettingsScreen}
+              options={{ title: '설정' }}
+            />
+          </Tab.Navigator>
+          <StatusBar style="light" backgroundColor="#2d3748" />
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

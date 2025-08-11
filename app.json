@@ -1,29 +1,60 @@
 {
   "expo": {
-    "name": "StyleWeather-App",
-    "slug": "StyleWeather-App",
+    "name": "StyleWeather",
+    "slug": "styleweather-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "description": "AI 기반 날씨 맞춤 코디 추천 앱",
+    "keywords": ["weather", "fashion", "AI", "outfit", "style", "코디", "날씨", "패션"],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2d3748"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.styleweather.app",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "현재 위치의 날씨 정보를 확인하여 맞춤 코디를 추천해드립니다.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "위치 기반 날씨 정보 제공을 위해 사용됩니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2d3748"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.styleweather.app",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "name": "StyleWeather",
+      "shortName": "StyleWeather",
+      "description": "AI 맞춤 코디 추천 서비스",
+      "backgroundColor": "#2d3748",
+      "themeColor": "#4299e1",
+      "display": "standalone",
+      "orientation": "portrait"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
+    "owner": "your-expo-username",
+    "privacy": "public",
+    "platforms": ["ios", "android", "web"],
+    "githubUrl": "https://github.com/your-username/StyleWeather-App"
   }
 }

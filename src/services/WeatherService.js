@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { CONFIG } from '../config/config';
+import CacheManager from '../utils/CacheManager';
 
 class WeatherService {
   constructor() {
@@ -7,8 +8,19 @@ class WeatherService {
     this.apiKey = CONFIG.OPENWEATHER_API_KEY;
   }
 
-  async getCurrentWeather(latitude, longitude) {
+  async getCurrentWeather(latitude, longitude, useCache = true) {
     try {
+      // 캐시 확인
+      if (useCache) {
+        const cacheKey = CacheManager.generateWeatherCacheKey(latitude, longitude);
+        const cachedWeather = await CacheManager.get(cacheKey);
+        
+        if (cachedWeather) {
+          console.log('Weather data loaded from cache');
+          return cachedWeather;
+        }
+      }
+
       const response = await axios.get(`${this.baseURL}/weather`, {
         params: {
           lat: latitude,
@@ -16,10 +28,11 @@ class WeatherService {
           appid: this.apiKey,
           units: 'metric',
           lang: 'kr'
-        }
+        },
+        timeout: 10000 // 10초 타임아웃
       });
 
-      return {
+      const weatherData = {
         temperature: Math.round(response.data.main.temp),
         feelsLike: Math.round(response.data.main.feels_like),
         humidity: response.data.main.humidity,
@@ -27,11 +40,35 @@ class WeatherService {
         icon: response.data.weather[0].icon,
         windSpeed: response.data.wind.speed,
         city: response.data.name,
-        country: response.data.sys.country
+        country: response.data.sys.country,
+        timestamp: Date.now()
       };
+
+      // 캐시에 저장 (10분간 유효)
+      if (useCache) {
+        const cacheKey = CacheManager.generateWeatherCacheKey(latitude, longitude);
+        await CacheManager.set(cacheKey, weatherData, 10 * 60 * 1000);
+      }
+
+      return weatherData;
     } catch (error) {
       console.error('Weather API Error:', error);
-      throw new Error('날씨 정보를 가져올 수 없습니다.');
+      
+      // 네트워크 오류시 오래된 캐시라도 반환 시도
+      if (useCache && error.code === 'NETWORK_ERROR') {
+        const cacheKey = CacheManager.generateWeatherCacheKey(latitude, longitude);
+        const oldCachedWeather = await CacheManager.get(cacheKey);
+        if (oldCachedWeather) {
+          console.log('Returning stale weather data due to network error');
+          return { ...oldCachedWeather, isStale: true };
+        }
+      }
+      
+      throw new Error(
+        error.code === 'NETWORK_ERROR' 
+          ? '인터넷 연결을 확인해주세요.' 
+          : '날씨 정보를 가져올 수 없습니다.'
+      );
     }
   }
 
