@@ -10,6 +10,12 @@ class WeatherService {
 
   async getCurrentWeather(latitude, longitude, useCache = true) {
     try {
+      // API 키 확인
+      if (!this.apiKey) {
+        console.error('No API key found');
+        throw new Error('API 키가 설정되지 않았습니다.');
+      }
+
       // 캐시 확인
       if (useCache) {
         const cacheKey = CacheManager.generateWeatherCacheKey(latitude, longitude);
@@ -29,7 +35,7 @@ class WeatherService {
           units: 'metric',
           lang: 'kr'
         },
-        timeout: 10000 // 10초 타임아웃
+        timeout: CONFIG.API_TIMEOUT
       });
 
       const weatherData = {
@@ -44,10 +50,10 @@ class WeatherService {
         timestamp: Date.now()
       };
 
-      // 캐시에 저장 (10분간 유효)
+      // 캐시에 저장
       if (useCache) {
         const cacheKey = CacheManager.generateWeatherCacheKey(latitude, longitude);
-        await CacheManager.set(cacheKey, weatherData, 10 * 60 * 1000);
+        await CacheManager.set(cacheKey, weatherData, CONFIG.CACHE_DURATION);
       }
 
       return weatherData;
@@ -65,7 +71,9 @@ class WeatherService {
       }
       
       throw new Error(
-        error.code === 'NETWORK_ERROR' 
+        error.response?.status === 401 
+          ? 'API 키가 유효하지 않습니다.' 
+          : error.code === 'NETWORK_ERROR' 
           ? '인터넷 연결을 확인해주세요.' 
           : '날씨 정보를 가져올 수 없습니다.'
       );
@@ -134,6 +142,54 @@ class WeatherService {
     }
 
     return recommendation;
+  }
+
+  // 더미 날씨 데이터 생성
+  getMockWeatherData() {
+    const mockWeathers = [
+      {
+        temperature: 22,
+        feelsLike: 24,
+        humidity: 65,
+        description: '맑음',
+        icon: '01d',
+        windSpeed: 2.1,
+        city: '서울',
+        country: 'KR',
+        timestamp: Date.now(),
+        isMock: true
+      },
+      {
+        temperature: 18,
+        feelsLike: 16,
+        humidity: 72,
+        description: '구름많음',
+        icon: '03d',
+        windSpeed: 3.2,
+        city: '서울',
+        country: 'KR',
+        timestamp: Date.now(),
+        isMock: true
+      },
+      {
+        temperature: 26,
+        feelsLike: 28,
+        humidity: 58,
+        description: '화창함',
+        icon: '01d',
+        windSpeed: 1.5,
+        city: '서울',
+        country: 'KR',
+        timestamp: Date.now(),
+        isMock: true
+      }
+    ];
+
+    // 시간대에 따라 다른 날씨 반환
+    const hour = new Date().getHours();
+    const index = hour % mockWeathers.length;
+    
+    return mockWeathers[index];
   }
 }
 

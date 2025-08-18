@@ -124,28 +124,49 @@ class AIRecommendationService {
       shoes: '',
       accessories: '',
       reason: '기본 추천 시스템',
-      confidence: 0.6
+      confidence: Math.random() * 0.3 + 0.6, // 0.6-0.9 랜덤
+      timestamp: Date.now() // 새로운 추천임을 확인하기 위한 타임스탬프
     };
 
-    // 온도별 기본 추천
+    // 온도별 기본 추천 (랜덤 선택)
+    const random = Math.floor(Math.random() * 3);
+    
     if (temperature >= 25) {
-      recommendation.top = gender === 'male' ? '반팔 티셔츠' : '블라우스';
-      recommendation.bottom = gender === 'male' ? '반바지' : '스커트';
-      recommendation.shoes = '샌들';
+      const hotTops = gender === 'male' ? ['반팔 티셔츠', '린넨 셔츠', '나시'] : ['블라우스', '캐미솔', '크롭탑'];
+      const hotBottoms = gender === 'male' ? ['반바지', '린넨 팬츠', '치노 반바지'] : ['스커트', '숏팬츠', '원피스'];
+      const hotShoes = ['샌들', '슬리퍼', '캔버스화'];
+      
+      recommendation.top = hotTops[random % hotTops.length];
+      recommendation.bottom = hotBottoms[random % hotBottoms.length];
+      recommendation.shoes = hotShoes[random % hotShoes.length];
     } else if (temperature >= 20) {
-      recommendation.top = '긴팔 셔츠';
-      recommendation.bottom = '청바지';
-      recommendation.shoes = '운동화';
+      const warmTops = ['긴팔 셔츠', '얇은 니트', '카디건'];
+      const warmBottoms = ['청바지', '치노팬츠', '면바지'];
+      const warmShoes = ['운동화', '로퍼', '플랫슈즈'];
+      
+      recommendation.top = warmTops[random % warmTops.length];
+      recommendation.bottom = warmBottoms[random % warmBottoms.length];
+      recommendation.shoes = warmShoes[random % warmShoes.length];
     } else if (temperature >= 15) {
-      recommendation.top = '스웨터';
-      recommendation.bottom = '청바지';
-      recommendation.outer = '가디건';
-      recommendation.shoes = '운동화';
+      const coolTops = ['스웨터', '후드티', '맨투맨'];
+      const coolBottoms = ['청바지', '슬랙스', '코듀로이 팬츠'];
+      const coolOuters = ['가디건', '자켓', '바람막이'];
+      const coolShoes = ['운동화', '앵클부츠', '옥스퍼드화'];
+      
+      recommendation.top = coolTops[random % coolTops.length];
+      recommendation.bottom = coolBottoms[random % coolBottoms.length];
+      recommendation.outer = coolOuters[random % coolOuters.length];
+      recommendation.shoes = coolShoes[random % coolShoes.length];
     } else {
-      recommendation.top = '니트';
-      recommendation.bottom = '두꺼운 바지';
-      recommendation.outer = '코트';
-      recommendation.shoes = '부츠';
+      const coldTops = ['니트', '터틀넥', '두꺼운 스웨터'];
+      const coldBottoms = ['두꺼운 바지', '기모 청바지', '울 팬츠'];
+      const coldOuters = ['코트', '패딩', '트렌치코트'];
+      const coldShoes = ['부츠', '워커', '하이탑'];
+      
+      recommendation.top = coldTops[random % coldTops.length];
+      recommendation.bottom = coldBottoms[random % coldBottoms.length];
+      recommendation.outer = coldOuters[random % coldOuters.length];
+      recommendation.shoes = coldShoes[random % coldShoes.length];
     }
 
     // 비 오는 날 추가 아이템
@@ -160,6 +181,17 @@ class AIRecommendationService {
       recommendation.shoes = gender === 'male' ? '구두' : '펌프스';
       recommendation.outer = '재킷';
     }
+
+    // 랜덤 추천 이유 생성
+    const reasons = [
+      `${temperature}°C 날씨에 딱 맞는 조합입니다`,
+      `오늘 같은 날씨엔 이런 스타일이 좋겠어요`,
+      `${description} 날씨를 고려한 실용적인 선택`,
+      `편안하면서도 스타일리시한 조합`,
+      `날씨 변화에 적응하기 좋은 레이어링`
+    ];
+    
+    recommendation.reason = reasons[Math.floor(Math.random() * reasons.length)];
 
     return recommendation;
   }

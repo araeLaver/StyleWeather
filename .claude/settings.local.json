@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "WebFetch(domain:git-scm.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
