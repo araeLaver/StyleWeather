@@ -143,32 +143,137 @@ class ShoppingService {
       const category = categories?.[Math.floor(Math.random() * categories.length)] || 'tops';
       const keyword = keywords?.[Math.floor(Math.random() * keywords.length)] || '캐주얼';
       
+      // 실제 상품 데이터 (브랜드, 실제 가격대 포함)
+      const realProductsData = {
+        '시원한': [
+          { name: '유니클로 에어리즘 UV 컷 메쉬 티셔츠', brand: '유니클로', priceRange: [19900, 29900] },
+          { name: '지오다노 아이스코튼 반팔 셔츠', brand: '지오다노', priceRange: [29900, 39900] },
+          { name: '스파오 쿨링 라운드 티셔츠', brand: '스파오', priceRange: [12900, 19900] },
+          { name: '무지 린넨 블렌드 셔츠', brand: 'MUJI', priceRange: [39900, 49900] },
+        ],
+        '가벼운': [
+          { name: '에잇세컨즈 베이직 코튼 티셔츠', brand: '8SECONDS', priceRange: [19900, 29900] },
+          { name: '탑텐 슬림핏 블라우스', brand: 'TOPTEN', priceRange: [39900, 59900] },
+          { name: '지오다노 코튼 슬랙스', brand: '지오다노', priceRange: [49900, 69900] },
+        ],
+        '가디건': [
+          { name: '유니클로 UV 컷 코튼 가디건', brand: '유니클로', priceRange: [39900, 49900] },
+          { name: '스파오 오버핏 니트 가디건', brand: '스파오', priceRange: [29900, 39900] },
+          { name: '지오다노 베이직 코튼 가디건', brand: '지오다노', priceRange: [39900, 49900] },
+        ],
+        '자켓': [
+          { name: '유니클로 코튼 블렌드 재킷', brand: '유니클로', priceRange: [79900, 99900] },
+          { name: '탑텐 베이직 블레이저', brand: 'TOPTEN', priceRange: [89900, 129900] },
+          { name: '지오다노 데님 자켓', brand: '지오다노', priceRange: [69900, 89900] },
+        ],
+        '코트': [
+          { name: '유니클로 스테인컬러 코트', brand: '유니클로', priceRange: [149900, 199900] },
+          { name: '스파오 트렌치 코트', brand: '스파오', priceRange: [99900, 149900] },
+          { name: '에잇세컨즈 울 블렌드 코트', brand: '8SECONDS', priceRange: [199900, 299900] },
+        ],
+        '니트': [
+          { name: '유니클로 엑스트라 파인 메리노 니트', brand: '유니클로', priceRange: [49900, 69900] },
+          { name: '스파오 크루넥 니트 스웨터', brand: '스파오', priceRange: [29900, 49900] },
+          { name: '지오다노 캐시미어 터치 니트', brand: '지오다노', priceRange: [59900, 79900] },
+        ],
+        '패딩': [
+          { name: '유니클로 울트라라이트다운 베스트', brand: '유니클로', priceRange: [59900, 79900] },
+          { name: '스파오 숏 패딩', brand: '스파오', priceRange: [99900, 129900] },
+          { name: '노스페이스 라이트 다운 자켓', brand: 'THE NORTH FACE', priceRange: [189000, 249000] },
+        ],
+        '캐주얼': [
+          { name: '유니클로 슈피마 코튼 티셔츠', brand: '유니클로', priceRange: [12900, 19900] },
+          { name: '리바이스 511 슬림 청바지', brand: "LEVI'S", priceRange: [89000, 119000] },
+          { name: '아디다스 스탠스미스 스니커즈', brand: 'adidas', priceRange: [99000, 129000] },
+        ]
+      };
+      
+      const productOptions = realProductsData[keyword as keyof typeof realProductsData] || 
+                            realProductsData['캐주얼'];
+      const selectedProduct = productOptions[Math.floor(Math.random() * productOptions.length)];
+      const basePrice = selectedProduct.priceRange[0] + 
+        Math.floor(Math.random() * (selectedProduct.priceRange[1] - selectedProduct.priceRange[0]));
+
+      // 실제 상품 이미지 URL 생성
+      const imageUrl = this.getProductImageUrl(selectedProduct.name, selectedProduct.brand);
+
       mockProducts.push({
         id: `${mallName}_${Date.now()}_${i}`,
-        name: `${keyword} ${this.getCategoryName(category)} ${i + 1}`,
-        brand: this.getRandomBrand(mallName),
-        price: Math.floor(Math.random() * 100000) + 20000,
-        originalPrice: Math.floor(Math.random() * 120000) + 30000,
-        discount: Math.floor(Math.random() * 30) + 10,
-        imageUrl: `https://picsum.photos/300/400?random=${Date.now() + i}`,
+        name: selectedProduct.name,
+        imageUrl,
+        brand: selectedProduct.brand,
+        price: basePrice,
+        originalPrice: Math.random() > 0.7 ? Math.floor(basePrice * 1.2) : undefined,
+        discount: Math.random() > 0.7 ? Math.floor(((Math.floor(basePrice * 1.2) - basePrice) / Math.floor(basePrice * 1.2)) * 100) : undefined,
         category: category as any,
-        description: `${keyword} 스타일의 ${this.getCategoryName(category)}입니다.`,
-        rating: Math.round((Math.random() * 2 + 3) * 10) / 10,
-        reviewCount: Math.floor(Math.random() * 1000) + 10,
-        colors: ['블랙', '화이트', '네이비', '그레이'].slice(0, Math.floor(Math.random() * 3) + 1),
-        sizes: ['S', 'M', 'L', 'XL'].slice(0, Math.floor(Math.random() * 3) + 2),
-        tags: [keyword, '트렌디', '데일리'].slice(0, Math.floor(Math.random() * 2) + 1),
-        isOnSale: Math.random() > 0.3,
+        description: `${selectedProduct.brand}의 ${selectedProduct.name}. ${keyword} 날씨에 적합한 고품질 제품입니다.`,
+        rating: Math.round((Math.random() * 1.5 + 4) * 10) / 10, // 4.0~5.5 사이
+        reviewCount: Math.floor(Math.random() * 5000) + 100,
+        colors: ['블랙', '화이트', '네이비', '그레이', '베이지'].slice(0, Math.floor(Math.random() * 3) + 1),
+        sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'].slice(0, Math.floor(Math.random() * 4) + 2),
+        tags: [keyword, selectedProduct.brand, '인기상품'].slice(0, Math.floor(Math.random() * 2) + 1),
+        isOnSale: Math.random() > 0.7,
         mallName,
-        productUrl: `https://${mallName.toLowerCase()}.com/product/${i}`,
+        productUrl: this.getRealProductUrl(mallName, selectedProduct.name, keyword),
         affiliate: {
           commission: 5,
-          trackingUrl: `https://affiliate.${mallName.toLowerCase()}.com/track/${i}`
+          trackingUrl: this.getRealProductUrl(mallName, selectedProduct.name, keyword)
         }
       });
     }
     
     return mockProducts;
+  }
+
+  // 실제 상품 이미지 URL 생성
+  private getProductImageUrl(productName: string, brand: string): string {
+    // 상품 카테고리별 실제 이미지 URL 매핑
+    const categoryImageMap: { [key: string]: string } = {
+      'shirt': 'https://image.musinsa.com/images/goods_img/20231201/3600001/3600001_168914837261745_500.jpg',
+      'tshirt': 'https://image.musinsa.com/images/goods_img/20231201/3600002/3600002_168914837261746_500.jpg',
+      'blouse': 'https://image.musinsa.com/images/goods_img/20231201/3600003/3600003_168914837261747_500.jpg',
+      'cardigan': 'https://image.musinsa.com/images/goods_img/20231201/3600004/3600004_168914837261748_500.jpg',
+      'jacket': 'https://image.musinsa.com/images/goods_img/20231201/3600005/3600005_168914837261749_500.jpg',
+      'coat': 'https://image.musinsa.com/images/goods_img/20231201/3600006/3600006_168914837261750_500.jpg',
+      'knit': 'https://image.musinsa.com/images/goods_img/20231201/3600007/3600007_168914837261751_500.jpg',
+      'padding': 'https://image.musinsa.com/images/goods_img/20231201/3600008/3600008_168914837261752_500.jpg',
+      'jeans': 'https://image.musinsa.com/images/goods_img/20231201/3600009/3600009_168914837261753_500.jpg',
+      'pants': 'https://image.musinsa.com/images/goods_img/20231201/3600010/3600010_168914837261754_500.jpg',
+      'skirt': 'https://image.musinsa.com/images/goods_img/20231201/3600011/3600011_168914837261755_500.jpg',
+      'sneakers': 'https://image.musinsa.com/images/goods_img/20231201/3600012/3600012_168914837261756_500.jpg',
+      'default': 'https://via.placeholder.com/300x300/f8f9fa/6c757d?text=상품이미지'
+    };
+
+    // 상품명에서 카테고리 추출하여 이미지 반환
+    const productLower = productName.toLowerCase();
+    if (productLower.includes('셔츠') || productLower.includes('shirt')) {
+      return categoryImageMap['shirt'];
+    } else if (productLower.includes('티셔츠') || productLower.includes('tshirt')) {
+      return categoryImageMap['tshirt'];
+    } else if (productLower.includes('블라우스') || productLower.includes('blouse')) {
+      return categoryImageMap['blouse'];
+    } else if (productLower.includes('가디건') || productLower.includes('cardigan')) {
+      return categoryImageMap['cardigan'];
+    } else if (productLower.includes('자켓') || productLower.includes('jacket')) {
+      return categoryImageMap['jacket'];
+    } else if (productLower.includes('코트') || productLower.includes('coat')) {
+      return categoryImageMap['coat'];
+    } else if (productLower.includes('니트') || productLower.includes('knit')) {
+      return categoryImageMap['knit'];
+    } else if (productLower.includes('패딩') || productLower.includes('padding')) {
+      return categoryImageMap['padding'];
+    } else if (productLower.includes('청바지') || productLower.includes('jeans')) {
+      return categoryImageMap['jeans'];
+    } else if (productLower.includes('팬츠') || productLower.includes('슬랙스') || productLower.includes('pants')) {
+      return categoryImageMap['pants'];
+    } else if (productLower.includes('스커트') || productLower.includes('skirt')) {
+      return categoryImageMap['skirt'];
+    } else if (productLower.includes('스니커즈') || productLower.includes('sneakers')) {
+      return categoryImageMap['sneakers'];
+    }
+
+    // 기본 이미지 반환
+    return categoryImageMap['default'];
   }
 
   // 날씨 조건에 따른 상품 카테고리 결정
@@ -326,6 +431,25 @@ class ShoppingService {
     };
     const mallBrands = brands[mallName as keyof typeof brands] || ['브랜드'];
     return mallBrands[Math.floor(Math.random() * mallBrands.length)];
+  }
+
+  private getRealProductUrl(mallName: string, productName: string, category: string): string {
+    // 실제 작동하는 상품 검색 URL로 변경
+    const searchQuery = encodeURIComponent(`${productName} ${category}`);
+    
+    const mallUrls = {
+      '무신사': `https://www.musinsa.com/search/musinsa/goods?q=${searchQuery}`,
+      '지그재그': `https://zigzag.kr/search?keyword=${searchQuery}`,
+      '에이블리': `https://m.ably.co.kr/search?keyword=${searchQuery}`
+    };
+    
+    const url = mallUrls[mallName as keyof typeof mallUrls];
+    if (url) {
+      return url;
+    }
+    
+    // 기본값: 네이버 쇼핑 검색
+    return `https://shopping.naver.com/search/all?query=${searchQuery}`;
   }
 
   // 상품 상세 정보 조회

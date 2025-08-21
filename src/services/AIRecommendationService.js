@@ -117,7 +117,7 @@ class AIRecommendationService {
     const { temperature, description } = weatherData;
     const { stylePreference, gender } = userPreferences;
 
-    let recommendation = {
+    const recommendation = {
       top: '',
       bottom: '',
       outer: '',

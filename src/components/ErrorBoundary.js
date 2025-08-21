@@ -94,88 +94,88 @@ class ErrorBoundary extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  button: {
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    padding: 20,
-  },
-  errorCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 24,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    maxWidth: 320,
-    width: '100%',
-  },
-  errorIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  errorMessage: {
-    fontSize: 14,
-    color: '#4a5568',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  debugInfo: {
-    backgroundColor: '#fed7d7',
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-    width: '100%',
-  },
-  debugTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#c53030',
-    marginBottom: 4,
-  },
-  debugText: {
-    fontSize: 10,
-    color: '#742a2a',
-    fontFamily: 'monospace',
+    flex: 1,
+    marginHorizontal: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
   },
-  button: {
-    flex: 1,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginHorizontal: 4,
+  container: {
     alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
   },
-  retryButton: {
-    backgroundColor: '#4299e1',
+  debugInfo: {
+    backgroundColor: '#fed7d7',
+    borderRadius: 8,
+    marginBottom: 20,
+    padding: 12,
+    width: '100%',
+  },
+  debugText: {
+    color: '#742a2a',
+    fontFamily: 'monospace',
+    fontSize: 10,
+  },
+  debugTitle: {
+    color: '#c53030',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  errorCard: {
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 3,
+    maxWidth: 320,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    width: '100%',
+  },
+  errorIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  errorMessage: {
+    color: '#4a5568',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  errorTitle: {
+    color: '#2d3748',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   reportButton: {
     backgroundColor: '#e2e8f0',
   },
-  retryButtonText: {
-    color: 'white',
+  reportButtonText: {
+    color: '#4a5568',
     fontSize: 14,
     fontWeight: 'bold',
   },
-  reportButtonText: {
-    color: '#4a5568',
+  retryButton: {
+    backgroundColor: '#4299e1',
+  },
+  retryButtonText: {
+    color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
   },

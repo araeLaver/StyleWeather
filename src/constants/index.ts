@@ -198,6 +198,16 @@ export const DEFAULT_LOCATION = {
   city: 'Seoul'
 } as const;
 
+// 한국 주요 도시 위치
+export const KOREA_LOCATIONS = {
+  seoul: { latitude: 37.5665, longitude: 126.9780, city: '서울' },
+  busan: { latitude: 35.1796, longitude: 129.0756, city: '부산' },
+  incheon: { latitude: 37.4563, longitude: 126.7052, city: '인천' },
+  daegu: { latitude: 35.8714, longitude: 128.6014, city: '대구' },
+  daejeon: { latitude: 36.3504, longitude: 127.3845, city: '대전' },
+  gwangju: { latitude: 35.1595, longitude: 126.8526, city: '광주' }
+} as const;
+
 // API 엔드포인트
 export const API_ENDPOINTS = {
   OPENWEATHER: {

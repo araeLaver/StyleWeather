@@ -127,8 +127,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   message: {
-    marginTop: SPACING.md,
     fontWeight: '500',
+    marginTop: SPACING.md,
     textAlign: 'center',
   },
 });

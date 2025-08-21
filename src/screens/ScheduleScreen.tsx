@@ -8,8 +8,10 @@ import {
   Alert,
   RefreshControl,
   TextInput,
-  Modal
+  Modal,
+  Platform
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SHADOWS } from '../constants';
 import { useUserData } from '../hooks/useUserData';
 import { useThemeContext } from '../components/ThemeProvider';
@@ -24,8 +26,8 @@ interface NewScheduleData {
   title: string;
   time: string;
   type: string;
-  location: string;
-  description: string;
+  location?: string;
+  description?: string;
   date: string;
 }
 
@@ -40,6 +42,9 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [newSchedule, setNewSchedule] = useState<NewScheduleData>({
     title: '',
@@ -52,7 +57,8 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
 
   // Redux 상태 및 액션
   const { 
-    schedules, 
+    schedules,
+    preferences,
     loading: userDataLoading,
     addNewSchedule,
     updateExistingSchedule,
@@ -232,7 +238,10 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
 
   // 이벤트 핸들러들
   const handleAddOrUpdateSchedule = useCallback(() => {
+    console.log('일정 저장 버튼 클릭됨:', newSchedule);
+    
     if (!newSchedule.title || !newSchedule.time) {
+      console.log('입력 오류: 제목 또는 시간 누락');
       Alert.alert('입력 오류', '제목과 시간을 입력해주세요.');
       return;
     }
@@ -240,17 +249,21 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
     try {
       const scheduleDate = newSchedule.date || selectedDate;
       const recommendedStyle = generateRecommendation(newSchedule.type);
+      console.log('생성된 추천 스타일:', recommendedStyle);
       
       const scheduleToSave: Omit<Schedule, 'id'> = {
         ...newSchedule,
+        type: newSchedule.type as 'business' | 'casual' | 'date' | 'exercise' | 'formal',
         date: scheduleDate,
         recommendedStyle
       };
 
       if (editingSchedule) {
+        console.log('기존 일정 수정:', editingSchedule.id);
         updateExistingSchedule(editingSchedule.id, scheduleToSave);
         Alert.alert('성공', '✅ 일정이 수정되었습니다!');
       } else {
+        console.log('새 일정 추가');
         addNewSchedule(scheduleToSave);
         Alert.alert('성공', '✅ 새 일정이 추가되었습니다!');
       }
@@ -265,6 +278,7 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
         description: '',
         date: selectedDate
       });
+      console.log('일정 저장 완료');
     } catch (error) {
       console.error('일정 저장 실패:', error);
       Alert.alert('오류', '일정 저장에 실패했습니다.');
@@ -272,6 +286,7 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
   }, [newSchedule, selectedDate, editingSchedule, generateRecommendation, addNewSchedule, updateExistingSchedule]);
 
   const handleDeleteSchedule = useCallback((scheduleId: string) => {
+    console.log('삭제 버튼 클릭됨:', scheduleId);
     Alert.alert(
       '일정 삭제',
       '정말로 이 일정을 삭제하시겠습니까?',
@@ -281,6 +296,7 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
           text: '삭제', 
           style: 'destructive',
           onPress: () => {
+            console.log('일정 삭제 실행:', scheduleId);
             removeSchedule(scheduleId);
             Alert.alert('완료', '🗑️ 일정이 삭제되었습니다.');
           }
@@ -290,6 +306,7 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
   }, [removeSchedule]);
 
   const handleEditSchedule = useCallback((schedule: Schedule) => {
+    console.log('편집 버튼 클릭됨:', schedule.id, schedule.title);
     setEditingSchedule(schedule);
     setNewSchedule({
       title: schedule.title,
@@ -300,27 +317,125 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
       date: schedule.date || selectedDate
     });
     setShowAddModal(true);
+    console.log('편집 모달 열림');
   }, [selectedDate]);
 
-  const handleGenerateNewRecommendation = useCallback(async (schedule: Schedule) => {
+  const handleGenerateNewRecommendation = useCallback((schedule: Schedule) => {
+    console.log('🔄 다시추천 버튼 클릭됨');
+    console.log('스케줄 정보:', { id: schedule.id, type: schedule.type, title: schedule.title });
+    
+    if (!schedule.id) {
+      console.error('❌ 스케줄 ID가 없습니다');
+      Alert.alert('오류', 'ID가 없는 일정입니다.');
+      return;
+    }
+
     try {
+      console.log('📝 새 추천 생성 시작...');
       const newRecommendation = generateRecommendation(schedule.type);
+      console.log('✅ 새 추천 생성됨:', newRecommendation);
+      
+      console.log('💾 추천 업데이트 시작...');
       updateExistingSchedule(schedule.id, { recommendedStyle: newRecommendation });
+      console.log('✅ 추천 업데이트 완료');
+      
       Alert.alert('완료', '🔄 새로운 추천을 생성했습니다!');
     } catch (error) {
-      console.error('새 추천 생성 실패:', error);
-      Alert.alert('오류', '추천 생성에 실패했습니다.');
+      console.error('❌ 새 추천 생성 실패:', error);
+      Alert.alert('오류', `추천 생성에 실패했습니다: ${error}`);
     }
   }, [generateRecommendation, updateExistingSchedule]);
 
+  // 날짜 선택 핸들러
+  const handleDateChange = useCallback((event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setSelectedDateTime(selectedDate);
+      const dateString = selectedDate.toISOString().split('T')[0];
+      setNewSchedule(prev => ({ ...prev, date: dateString }));
+    }
+  }, []);
+
+  // 시간 선택 핸들러
+  const handleTimeChange = useCallback((event: any, selectedTime?: Date) => {
+    setShowTimePicker(Platform.OS === 'ios');
+    if (selectedTime) {
+      setSelectedDateTime(selectedTime);
+      const timeString = selectedTime.toLocaleTimeString('ko-KR', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+      setNewSchedule(prev => ({ ...prev, time: timeString }));
+    }
+  }, []);
+
+  // 날짜 선택 버튼
+  const showDateSelection = useCallback(() => {
+    console.log('📅 날짜 선택 버튼 클릭됨');
+    
+    // 웹에서는 input type="date" 사용
+    if (Platform.OS === 'web') {
+      const input = document.createElement('input');
+      input.type = 'date';
+      input.value = newSchedule.date || selectedDate;
+      input.style.position = 'absolute';
+      input.style.left = '-9999px';
+      document.body.appendChild(input);
+      
+      input.onchange = (e) => {
+        const target = e.target as HTMLInputElement;
+        const dateValue = target.value;
+        console.log('선택된 날짜:', dateValue);
+        setNewSchedule(prev => ({ ...prev, date: dateValue }));
+        setSelectedDate(dateValue);
+        document.body.removeChild(input);
+      };
+      
+      input.click();
+    } else {
+      setShowDatePicker(true);
+    }
+  }, [newSchedule.date, selectedDate]);
+
+  // 시간 선택 버튼
+  const showTimeSelection = useCallback(() => {
+    console.log('🕐 시간 선택 버튼 클릭됨');
+    
+    // 웹에서는 input type="time" 사용
+    if (Platform.OS === 'web') {
+      const input = document.createElement('input');
+      input.type = 'time';
+      input.value = newSchedule.time || '';
+      input.style.position = 'absolute';
+      input.style.left = '-9999px';
+      document.body.appendChild(input);
+      
+      input.onchange = (e) => {
+        const target = e.target as HTMLInputElement;
+        const timeValue = target.value;
+        console.log('선택된 시간:', timeValue);
+        setNewSchedule(prev => ({ ...prev, time: timeValue }));
+        document.body.removeChild(input);
+      };
+      
+      input.click();
+    } else {
+      setShowTimePicker(true);
+    }
+  }, [newSchedule.time]);
+
   const handleFeedback = useCallback((schedule: Schedule) => {
+    console.log('피드백 버튼 클릭됨:', schedule.id);
     Alert.alert('피드백 감사합니다!', '👍 좋은 추천이었다니 기뻐요! 😊');
   }, []);
 
   const changeMonth = useCallback((direction: number) => {
+    console.log('달력 월 변경:', direction > 0 ? '다음달' : '이전달');
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() + direction);
     setCurrentMonth(newMonth);
+    console.log('새로운 월:', newMonth.getMonth() + 1);
   }, [currentMonth]);
 
   const onRefresh = useCallback(async () => {
@@ -330,6 +445,9 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
   }, []);
 
   const openAddModal = useCallback(() => {
+    console.log('➕ 일정 추가 버튼 클릭됨');
+    console.log('현재 선택된 날짜:', selectedDate);
+    
     setEditingSchedule(null);
     setNewSchedule({
       title: '',
@@ -340,19 +458,15 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
       date: selectedDate
     });
     setShowAddModal(true);
+    console.log('✅ 새 일정 모달 열림');
   }, [selectedDate]);
 
   const closeModal = useCallback(() => {
+    console.log('모달 닫기 버튼 클릭됨');
     setShowAddModal(false);
     setEditingSchedule(null);
   }, []);
 
-  const handleDateChange = useCallback((dateInput: string) => {
-    if (dateInput && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
-      setNewSchedule(prev => ({ ...prev, date: dateInput }));
-      setSelectedDate(dateInput);
-    }
-  }, []);
 
   if (loading || userDataLoading) {
     return (
@@ -635,12 +749,15 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
 
             <View style={styles.formGroup}>
               <Text style={[styles.formLabel, { color: colors.text.primary }]}>시간 *</Text>
-              <TextInput
-                style={[styles.formInput, { backgroundColor: colors.background.primary, color: colors.text.primary, borderColor: colors.border?.medium || '#E5E7EB' }]}
-                value={newSchedule.time}
-                onChangeText={(text) => setNewSchedule(prev => ({...prev, time: text}))}
-                placeholder="예: 09:00"
-              />
+              <TouchableOpacity 
+                style={[styles.formInput, styles.timeButton, { backgroundColor: colors.background.primary, borderColor: colors.border?.medium || '#E5E7EB' }]}
+                onPress={showTimeSelection}
+              >
+                <Text style={[styles.timeButtonText, { color: newSchedule.time ? colors.text.primary : colors.text.secondary }]}>
+                  {newSchedule.time || '시간 선택'}
+                </Text>
+                <Text style={[styles.timeButtonIcon, { color: colors.text.secondary }]}>🕐</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.formGroup}>
@@ -674,13 +791,15 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
 
             <View style={styles.formGroup}>
               <Text style={[styles.formLabel, { color: colors.text.primary }]}>날짜</Text>
-              <TextInput
-                style={[styles.formInput, { backgroundColor: colors.background.primary, color: colors.text.primary, borderColor: colors.border?.medium || '#E5E7EB' }]}
-                value={newSchedule.date}
-                onChangeText={(text) => handleDateChange(text)}
-                placeholder="YYYY-MM-DD"
-                keyboardType="numeric"
-              />
+              <TouchableOpacity 
+                style={[styles.formInput, styles.timeButton, { backgroundColor: colors.background.primary, borderColor: colors.border?.medium || '#E5E7EB' }]}
+                onPress={showDateSelection}
+              >
+                <Text style={[styles.timeButtonText, { color: newSchedule.date ? colors.text.primary : colors.text.secondary }]}>
+                  {newSchedule.date || '날짜 선택'}
+                </Text>
+                <Text style={[styles.timeButtonIcon, { color: colors.text.secondary }]}>📅</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.formGroup}>
@@ -697,6 +816,26 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = memo(({ navigation }) => {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* 날짜 선택기 */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDateTime}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleDateChange}
+        />
+      )}
+
+      {/* 시간 선택기 */}
+      {showTimePicker && (
+        <DateTimePicker
+          value={selectedDateTime}
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleTimeChange}
+        />
+      )}
     </ScrollView>
   );
 });
@@ -706,19 +845,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.background.primary,
+    flex: 1,
+    justifyContent: 'center',
   },
   loadingText: {
-    fontSize: FONT_SIZES.base,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.base,
   },
   header: {
+    alignItems: 'center',
     backgroundColor: COLORS.gray[800],
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
     padding: SPACING.lg,
     paddingTop: 50,
@@ -758,34 +897,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   emptyContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING['2xl'],
     marginTop: 60,
+    padding: SPACING['2xl'],
   },
   emptyText: {
     fontSize: 48,
     marginBottom: SPACING.lg,
   },
   emptyTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.sm,
   },
   emptySubtitle: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
-    textAlign: 'center',
+    fontSize: FONT_SIZES.sm,
     lineHeight: 20,
     marginBottom: SPACING.xl,
+    textAlign: 'center',
   },
   connectButton: {
     backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
   },
   connectButtonText: {
     color: COLORS.white,
@@ -794,8 +933,8 @@ const styles = StyleSheet.create({
   },
   scheduleCard: {
     backgroundColor: COLORS.white,
-    margin: SPACING.lg,
     borderRadius: BORDER_RADIUS.lg,
+    margin: SPACING.lg,
     padding: SPACING.lg,
     ...SHADOWS.md,
   },
@@ -809,9 +948,9 @@ const styles = StyleSheet.create({
     minWidth: 60,
   },
   timeText: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.xs,
   },
   typeIcon: {
@@ -821,31 +960,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scheduleTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.xs,
   },
   scheduleLocation: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.sm,
     marginBottom: SPACING.xs,
   },
   scheduleDescription: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.sm,
     lineHeight: 20,
   },
   recommendationSection: {
     backgroundColor: COLORS.gray[50],
     borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
     marginBottom: SPACING.lg,
+    padding: SPACING.lg,
   },
   recommendationTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.md,
   },
   styleGrid: {
@@ -854,52 +993,53 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   styleItem: {
-    width: '48%',
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.sm,
-    padding: SPACING.md,
     marginBottom: SPACING.sm,
+    padding: SPACING.md,
+    width: '48%',
   },
   styleCategory: {
+    color: COLORS.text.secondary,
     fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
-    color: COLORS.text.secondary,
     marginBottom: 2,
   },
   styleText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
   },
   accessoryContainer: {
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.sm,
-    padding: SPACING.md,
-    marginTop: SPACING.sm,
     flexDirection: 'row',
+    marginTop: SPACING.sm,
+    padding: SPACING.md,
   },
   accessoryLabel: {
+    color: COLORS.text.secondary,
     fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
-    color: COLORS.text.secondary,
     marginRight: SPACING.sm,
   },
   accessoryText: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.primary,
     flex: 1,
+    fontSize: FONT_SIZES.xs,
   },
   scheduleActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
+    justifyContent: 'space-around',
+    marginHorizontal: -SPACING.xs,
   },
   actionButton: {
     backgroundColor: COLORS.gray[100],
     borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
     marginBottom: SPACING.xs,
+    marginHorizontal: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   editButton: {
     backgroundColor: COLORS.info,
@@ -908,8 +1048,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.error,
   },
   actionButtonText: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
     fontWeight: '600',
   },
   bottomPadding: {
@@ -918,14 +1058,14 @@ const styles = StyleSheet.create({
 
   // === 모달 스타일 ===
   modalContainer: {
-    flex: 1,
     backgroundColor: COLORS.background.primary,
+    flex: 1,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.gray[800],
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: SPACING.lg,
     paddingTop: 50,
   },
@@ -938,9 +1078,9 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: COLORS.white,
+    flex: 1,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    flex: 1,
     textAlign: 'center',
   },
   modalSaveButton: {
@@ -962,18 +1102,31 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   formLabel: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.sm,
   },
   formInput: {
     backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    fontSize: FONT_SIZES.base,
-    borderWidth: 1,
     borderColor: COLORS.gray[200],
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    fontSize: FONT_SIZES.base,
+    padding: SPACING.md,
+  },
+  timeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timeButtonText: {
+    fontSize: FONT_SIZES.base,
+    flex: 1,
+  },
+  timeButtonIcon: {
+    fontSize: FONT_SIZES.lg,
+    marginLeft: SPACING.sm,
   },
   formTextArea: {
     height: 80,
@@ -983,12 +1136,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   typeButton: {
-    borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    marginRight: SPACING.sm,
-    borderWidth: 2,
     borderColor: 'transparent',
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 2,
+    marginRight: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
   },
   typeButtonSelected: {
     borderColor: COLORS.white,
@@ -1003,57 +1156,57 @@ const styles = StyleSheet.create({
   // === 캘린더 스타일 ===
   calendarContainer: {
     backgroundColor: COLORS.white,
+    borderRadius: BORDER_RADIUS.lg,
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.sm,
-    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     ...SHADOWS.md,
   },
   calendarHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: SPACING.lg,
   },
   monthButton: {
-    padding: SPACING.sm,
-    borderRadius: BORDER_RADIUS.sm,
     backgroundColor: COLORS.background.primary,
+    borderRadius: BORDER_RADIUS.sm,
+    padding: SPACING.sm,
   },
   monthButtonText: {
+    color: COLORS.text.primary,
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
   },
   monthTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
   },
   weekDaysContainer: {
     flexDirection: 'row',
     marginBottom: SPACING.sm,
   },
   weekDayText: {
+    color: COLORS.text.secondary,
     flex: 1,
-    textAlign: 'center',
     fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
-    color: COLORS.text.secondary,
     paddingVertical: SPACING.sm,
+    textAlign: 'center',
   },
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   calendarDay: {
-    width: '14.285%',
-    aspectRatio: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    aspectRatio: 1,
     borderRadius: BORDER_RADIUS.sm,
+    justifyContent: 'center',
     marginBottom: 2,
     position: 'relative',
+    width: '14.285%',
   },
   calendarDayOtherMonth: {
     opacity: 0.3,
@@ -1063,13 +1216,13 @@ const styles = StyleSheet.create({
   },
   calendarDayToday: {
     backgroundColor: '#FEF3C7',
-    borderWidth: 2,
     borderColor: COLORS.warning,
+    borderWidth: 2,
   },
   calendarDayText: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    color: COLORS.text.primary,
   },
   calendarDayTextOtherMonth: {
     color: COLORS.text.disabled,
@@ -1083,15 +1236,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   calendarDayDot: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
+    alignItems: 'center',
     backgroundColor: COLORS.error,
     borderRadius: 8,
-    minWidth: 16,
     height: 16,
     justifyContent: 'center',
-    alignItems: 'center',
+    minWidth: 16,
+    position: 'absolute',
+    right: 2,
+    top: 2,
   },
   calendarDayDotText: {
     color: COLORS.white,
@@ -1099,33 +1252,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedDateContainer: {
+    alignItems: 'center',
     backgroundColor: COLORS.white,
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.sm,
     borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.sm,
+    padding: SPACING.lg,
     ...SHADOWS.md,
   },
   selectedDateText: {
-    fontSize: FONT_SIZES.base,
-    fontWeight: 'bold',
     color: COLORS.text.primary,
     flex: 1,
+    fontSize: FONT_SIZES.base,
+    fontWeight: 'bold',
   },
   datePickerButton: {
-    backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.gray[200],
     alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.gray[200],
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.md,
   },
   datePickerText: {
-    fontSize: FONT_SIZES.base,
     color: COLORS.text.primary,
+    fontSize: FONT_SIZES.base,
     fontWeight: '600',
   },
 });

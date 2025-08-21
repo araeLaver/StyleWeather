@@ -77,20 +77,38 @@ export const useWeather = (): UseWeatherReturn => {
           navigator.geolocation.getCurrentPosition(
             (position) => {
               const { latitude, longitude } = position.coords;
-              dispatch(setLocation({ latitude, longitude }));
-              resolve({ latitude, longitude });
+              console.log('현재 위치 감지됨:', { latitude, longitude });
+              
+              // 한국 영역 체크 (위도 33-43, 경도 124-132)
+              const isInKorea = latitude >= 33 && latitude <= 43 && longitude >= 124 && longitude <= 132;
+              
+              if (!isInKorea) {
+                console.log('한국 영역 밖의 위치가 감지됨. 서울로 설정합니다.');
+                dispatch(setLocation({ 
+                  latitude: CONFIG.DEFAULT_LOCATION.latitude, 
+                  longitude: CONFIG.DEFAULT_LOCATION.longitude 
+                }));
+                resolve({ 
+                  latitude: CONFIG.DEFAULT_LOCATION.latitude, 
+                  longitude: CONFIG.DEFAULT_LOCATION.longitude 
+                });
+              } else {
+                dispatch(setLocation({ latitude, longitude }));
+                resolve({ latitude, longitude });
+              }
             },
             (error) => {
               console.warn('Browser geolocation failed:', error);
+              console.log('기본 위치 사용:', CONFIG.DEFAULT_LOCATION);
               resolve({
                 latitude: CONFIG.DEFAULT_LOCATION.latitude,
                 longitude: CONFIG.DEFAULT_LOCATION.longitude,
               });
             },
             {
-              enableHighAccuracy: false,
-              timeout: 10000,
-              maximumAge: 5 * 60 * 1000
+              enableHighAccuracy: true,
+              timeout: 15000,
+              maximumAge: 60 * 1000
             }
           );
         });
@@ -109,7 +127,6 @@ export const useWeather = (): UseWeatherReturn => {
 
       const locationResult = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
-        maximumAge: 5 * 60 * 1000, // 5분 캐시
       });
       
       const { latitude, longitude } = locationResult.coords;

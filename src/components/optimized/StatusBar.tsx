@@ -106,19 +106,43 @@ const StatusBar: React.FC<StatusBarProps> = memo(({
 });
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
+  actionButton: {
+    borderRadius: BORDER_RADIUS.xs,
+    borderWidth: 1,
+    marginRight: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  actionText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+  },
+  actions: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: SPACING.md,
+    flexDirection: 'row',
+    marginLeft: SPACING.md,
+  },
+  container: {
+    alignItems: 'center',
     borderLeftWidth: 4,
     borderRadius: BORDER_RADIUS.sm,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: SPACING.sm,
+    padding: SPACING.md,
   },
   content: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     flex: 1,
+  },
+  dismissButton: {
+    borderRadius: BORDER_RADIUS.xs,
+    padding: SPACING.xs,
+  },
+  dismissText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: 'bold',
   },
   icon: {
     fontSize: FONT_SIZES.lg,
@@ -129,30 +153,6 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     lineHeight: 20,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: SPACING.md,
-  },
-  actionButton: {
-    borderWidth: 1,
-    borderRadius: BORDER_RADIUS.xs,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    marginRight: SPACING.sm,
-  },
-  actionText: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
-  },
-  dismissButton: {
-    padding: SPACING.xs,
-    borderRadius: BORDER_RADIUS.xs,
-  },
-  dismissText: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: 'bold',
   },
 });
 

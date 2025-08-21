@@ -9,44 +9,61 @@ import {
   Alert
 } from 'react-native';
 import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants';
-import type { Product } from '../../types/shopping';
+import type { RealProduct } from '../../services/RealProductService';
 
 interface ProductCardProps {
-  product: Product;
-  onPress?: (product: Product) => void;
+  product: RealProduct;
+  onPress?: (product: RealProduct) => void;
   compact?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = memo(({ product, onPress, compact = false }) => {
   const handlePress = () => {
+    console.log('ProductCard 클릭됨:', product.name, product.productUrl);
     if (onPress) {
+      console.log('onPress 콜백 실행');
       onPress(product);
     } else {
+      console.log('기본 링크 열기 실행');
       // 기본 동작: 상품 링크로 이동
       handleOpenProduct();
     }
   };
 
   const handleOpenProduct = async () => {
+    console.log('handleOpenProduct 시작');
     try {
       const url = product.affiliate?.trackingUrl || product.productUrl;
+      console.log('열려는 URL:', url);
+      
+      if (!url) {
+        console.log('URL이 없음');
+        Alert.alert('오류', '상품 링크가 없습니다.');
+        return;
+      }
       
       // 웹에서는 window.open 사용
       if (typeof window !== 'undefined') {
+        console.log('웹 환경: window.open 사용');
         window.open(url, '_blank');
         return;
       }
       
       // 모바일에서는 Linking 사용
+      console.log('모바일 환경: Linking.openURL 사용');
       const supported = await Linking.canOpenURL(url);
+      console.log('URL 지원 여부:', supported);
+      
       if (supported) {
         await Linking.openURL(url);
+        console.log('링크 열기 성공');
       } else {
+        console.log('링크 지원 안됨');
         Alert.alert('오류', '링크를 열 수 없습니다.');
       }
     } catch (error) {
       console.error('상품 링크 열기 실패:', error);
-      Alert.alert('오류', '링크를 열 수 없습니다.');
+      Alert.alert('오류', `링크를 열 수 없습니다: ${error}`);
     }
   };
 
@@ -71,12 +88,10 @@ const ProductCard: React.FC<ProductCardProps> = memo(({ product, onPress, compac
           resizeMode="cover"
         />
         
-        {/* 할인 뱃지 */}
-        {product.isOnSale && product.discount && (
-          <View style={styles.discountBadge}>
-            <Text style={styles.discountText}>{product.discount}%</Text>
-          </View>
-        )}
+        {/* 추천 뱃지 */}
+        <View style={styles.recommendBadge}>
+          <Text style={styles.recommendText}>추천</Text>
+        </View>
         
         {/* 쇼핑몰 로고 */}
         <View style={styles.mallBadge}>
@@ -94,23 +109,17 @@ const ProductCard: React.FC<ProductCardProps> = memo(({ product, onPress, compac
           {product.name}
         </Text>
 
-        {/* 가격 정보 */}
+        {/* 가격 확인 버튼 */}
         <View style={styles.priceContainer}>
-          {product.originalPrice && product.originalPrice > product.price && (
-            <Text style={styles.originalPrice}>
-              {formatPrice(product.originalPrice)}
-            </Text>
-          )}
-          <Text style={styles.currentPrice}>
-            {formatPrice(product.price)}
-          </Text>
+          <TouchableOpacity style={styles.priceButton} onPress={handlePress}>
+            <Text style={styles.priceButtonText}>💰 가격 확인하기</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* 평점 및 리뷰 */}
+        {/* 브랜드 정보만 표시 */}
         {!compact && (
-          <View style={styles.ratingContainer}>
-            <Text style={styles.rating}>⭐ {product.rating}</Text>
-            <Text style={styles.reviewCount}>({product.reviewCount})</Text>
+          <View style={styles.brandContainer}>
+            <Text style={styles.brandInfo}>{product.brand} 공식</Text>
           </View>
         )}
 
@@ -133,6 +142,12 @@ const ProductCard: React.FC<ProductCardProps> = memo(({ product, onPress, compac
 });
 
 const styles = StyleSheet.create({
+  brandName: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
   card: {
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.lg,
@@ -141,6 +156,23 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     width: 160,
     ...SHADOWS.sm,
+  },
+  colorContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  colorDot: {
+    backgroundColor: COLORS.gray[100],
+    borderRadius: BORDER_RADIUS.xs,
+    marginBottom: 2,
+    marginRight: SPACING.xs,
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: 2,
+  },
+  colorText: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs - 2,
   },
   compactCard: {
     backgroundColor: COLORS.white,
@@ -151,111 +183,122 @@ const styles = StyleSheet.create({
     width: 140,
     ...SHADOWS.xs,
   },
-  imageContainer: {
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: 200,
-  },
   compactImage: {
-    width: '100%',
     height: 160,
+    width: '100%',
+  },
+  currentPrice: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.base,
+    fontWeight: 'bold',
   },
   discountBadge: {
-    position: 'absolute',
-    top: SPACING.xs,
-    left: SPACING.xs,
     backgroundColor: COLORS.error,
     borderRadius: BORDER_RADIUS.sm,
+    left: SPACING.xs,
     paddingHorizontal: SPACING.xs,
     paddingVertical: 2,
+    position: 'absolute',
+    top: SPACING.xs,
   },
   discountText: {
     color: COLORS.white,
     fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
   },
+  image: {
+    height: 200,
+    width: '100%',
+  },
+  imageContainer: {
+    position: 'relative',
+  },
   mallBadge: {
-    position: 'absolute',
-    top: SPACING.xs,
-    right: SPACING.xs,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: BORDER_RADIUS.xs,
     paddingHorizontal: SPACING.xs,
     paddingVertical: 2,
+    position: 'absolute',
+    right: SPACING.xs,
+    top: SPACING.xs,
   },
   mallText: {
     color: COLORS.white,
     fontSize: FONT_SIZES.xs - 2,
     fontWeight: '500',
   },
-  productInfo: {
-    padding: SPACING.sm,
-  },
-  brandName: {
-    fontSize: FONT_SIZES.xs,
+  moreColors: {
     color: COLORS.text.secondary,
-    fontWeight: '500',
-    marginBottom: 2,
+    fontSize: FONT_SIZES.xs,
+    marginLeft: SPACING.xs,
   },
-  productName: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.primary,
-    fontWeight: '600',
-    marginBottom: SPACING.xs,
-    lineHeight: 18,
+  originalPrice: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    marginBottom: 2,
+    textDecorationLine: 'line-through',
   },
   priceContainer: {
     marginBottom: SPACING.xs,
   },
-  originalPrice: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
-    textDecorationLine: 'line-through',
-    marginBottom: 2,
+  priceButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    alignItems: 'center',
   },
-  currentPrice: {
-    fontSize: FONT_SIZES.base,
-    color: COLORS.text.primary,
+  priceButtonText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+  },
+  brandContainer: {
+    marginBottom: SPACING.xs,
+  },
+  brandInfo: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '500',
+  },
+  recommendBadge: {
+    backgroundColor: COLORS.success,
+    borderRadius: BORDER_RADIUS.sm,
+    left: SPACING.xs,
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: 2,
+    position: 'absolute',
+    top: SPACING.xs,
+  },
+  recommendText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  productInfo: {
+    padding: SPACING.sm,
+  },
+  productName: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+    lineHeight: 18,
     marginBottom: SPACING.xs,
   },
   rating: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.warning,
+    fontSize: FONT_SIZES.xs,
     fontWeight: '600',
     marginRight: SPACING.xs,
   },
-  reviewCount: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
-  },
-  colorContainer: {
-    flexDirection: 'row',
+  ratingContainer: {
     alignItems: 'center',
-    flexWrap: 'wrap',
+    flexDirection: 'row',
+    marginBottom: SPACING.xs,
   },
-  colorDot: {
-    backgroundColor: COLORS.gray[100],
-    borderRadius: BORDER_RADIUS.xs,
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-    marginRight: SPACING.xs,
-    marginBottom: 2,
-  },
-  colorText: {
-    fontSize: FONT_SIZES.xs - 2,
+  reviewCount: {
     color: COLORS.text.secondary,
-  },
-  moreColors: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
-    marginLeft: SPACING.xs,
   },
 });
 

@@ -108,18 +108,18 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = memo(({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: BORDER_RADIUS.sm,
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+    marginHorizontal: SPACING.md,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.sm,
-    marginHorizontal: SPACING.md,
-    marginBottom: SPACING.sm,
   },
   content: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     flex: 1,
   },
   icon: {
@@ -127,16 +127,16 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   message: {
+    flex: 1,
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    flex: 1,
   },
   syncButton: {
-    borderWidth: 1,
     borderRadius: BORDER_RADIUS.xs,
+    borderWidth: 1,
+    marginLeft: SPACING.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
-    marginLeft: SPACING.md,
   },
   syncButtonText: {
     fontSize: FONT_SIZES.xs,

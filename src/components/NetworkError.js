@@ -31,39 +31,39 @@ const NetworkError = ({ onRetry, message }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f8f9fa',
+    flex: 1,
+    justifyContent: 'center',
     padding: 20,
   },
   icon: {
     fontSize: 48,
     marginBottom: 16,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    marginBottom: 8,
-  },
   message: {
-    fontSize: 14,
     color: '#4a5568',
-    textAlign: 'center',
+    fontSize: 14,
     lineHeight: 20,
     marginBottom: 24,
+    textAlign: 'center',
   },
   retryButton: {
     backgroundColor: '#4299e1',
     borderRadius: 8,
-    paddingVertical: 12,
     paddingHorizontal: 24,
+    paddingVertical: 12,
   },
   retryButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  title: {
+    color: '#2d3748',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
 });
 

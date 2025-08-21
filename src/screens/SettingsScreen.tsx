@@ -803,16 +803,16 @@ const SettingsScreen: React.FC<SettingsScreenProps> = memo(({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: COLORS.background.primary,
+    flex: 1,
   },
   scrollContainer: {
     flex: 1,
   },
   header: {
+    alignItems: 'center',
     backgroundColor: COLORS.gray[800],
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
     padding: SPACING.lg,
     paddingTop: 50,
@@ -833,9 +833,9 @@ const styles = StyleSheet.create({
     width: 50,
   },
   section: {
-    marginTop: SPACING.lg,
-    marginHorizontal: SPACING.lg,
     borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
     padding: SPACING.lg,
     ...SHADOWS.md,
   },
@@ -844,59 +844,59 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
   },
   sectionTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.xs,
   },
   sectionDescription: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
-    marginBottom: SPACING.lg,
+    fontSize: FONT_SIZES.sm,
     lineHeight: 20,
+    marginBottom: SPACING.lg,
   },
   settingItem: {
+    alignItems: 'center',
+    borderBottomColor: COLORS.gray[100],
+    borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.gray[100],
   },
   settingLabelContainer: {
     flex: 1,
   },
   settingLabel: {
-    fontSize: FONT_SIZES.base,
     color: COLORS.text.primary,
+    fontSize: FONT_SIZES.base,
     fontWeight: '600',
     marginBottom: 2,
   },
   settingSubLabel: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
     lineHeight: 16,
   },
   settingValueContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   settingValue: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.sm,
     fontWeight: '500',
     marginRight: SPACING.sm,
   },
   settingArrow: {
-    fontSize: FONT_SIZES.base,
     color: COLORS.text.disabled,
+    fontSize: FONT_SIZES.base,
   },
   stylePreview: {
     marginTop: SPACING.lg,
   },
   stylePreviewTitle: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
     marginBottom: SPACING.sm,
   },
   styleOptions: {
@@ -905,12 +905,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   styleOption: {
-    width: '18%',
     alignItems: 'center',
-    padding: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
     backgroundColor: COLORS.gray[50],
+    borderRadius: BORDER_RADIUS.md,
     marginBottom: SPACING.sm,
+    padding: SPACING.sm,
+    width: '18%',
   },
   styleOptionSelected: {
     backgroundColor: COLORS.primary,
@@ -920,8 +920,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   styleOptionText: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
     textAlign: 'center',
   },
   styleOptionTextSelected: {
@@ -934,12 +934,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   exportButton: {
-    flex: 1,
+    alignItems: 'center',
     backgroundColor: COLORS.info,
     borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
-    alignItems: 'center',
+    flex: 1,
     marginRight: SPACING.sm,
+    padding: SPACING.lg,
   },
   exportButtonText: {
     color: COLORS.white,
@@ -947,12 +947,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   testButton: {
-    flex: 1,
+    alignItems: 'center',
     backgroundColor: '#8B5CF6',
     borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
-    alignItems: 'center',
+    flex: 1,
     marginLeft: SPACING.sm,
+    padding: SPACING.lg,
   },
   testButtonText: {
     color: COLORS.white,
@@ -960,12 +960,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   dangerButton: {
-    backgroundColor: '#FED7D7',
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
     alignItems: 'center',
-    borderWidth: 1,
+    backgroundColor: '#FED7D7',
     borderColor: '#FCA5A5',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.lg,
   },
   dangerButtonText: {
     color: '#DC2626',
@@ -975,16 +975,16 @@ const styles = StyleSheet.create({
   // === 상태 요약 섹션 ===
   statusSection: {
     backgroundColor: COLORS.white,
+    borderRadius: BORDER_RADIUS.lg,
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     ...SHADOWS.sm,
   },
   statusTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.base,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.md,
   },
   statusGrid: {
@@ -993,22 +993,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statusItem: {
-    width: '48%',
+    alignItems: 'center',
     backgroundColor: COLORS.gray[50],
     borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.sm,
-    alignItems: 'center',
+    padding: SPACING.md,
+    width: '48%',
   },
   statusLabel: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
     fontWeight: '600',
     marginBottom: SPACING.xs,
   },
   statusValue: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
   },
 
@@ -1017,9 +1017,9 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   colorSectionTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.md,
   },
   colorGrid: {
@@ -1028,14 +1028,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   colorButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    margin: 4,
-    justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
     borderColor: 'transparent',
+    borderRadius: 18,
+    borderWidth: 2,
+    height: 36,
+    justifyContent: 'center',
+    margin: 4,
+    width: 36,
   },
   colorButtonSelected: {
     borderColor: COLORS.success,
@@ -1068,31 +1068,31 @@ const styles = StyleSheet.create({
 
   // === 선택 모달 스타일 ===
   modalContainer: {
-    flex: 1,
     backgroundColor: COLORS.background.primary,
+    flex: 1,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.gray[800],
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: SPACING.lg,
     paddingTop: 50,
   },
   modalTitle: {
     color: COLORS.white,
+    flex: 1,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    flex: 1,
     textAlign: 'center',
   },
   modalCloseButton: {
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 15,
-    width: 30,
     height: 30,
     justifyContent: 'center',
-    alignItems: 'center',
+    width: 30,
   },
   modalCloseText: {
     color: COLORS.white,
@@ -1105,20 +1105,20 @@ const styles = StyleSheet.create({
   },
   modalOption: {
     backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.sm,
-    borderWidth: 2,
     borderColor: 'transparent',
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 2,
+    marginBottom: SPACING.sm,
+    padding: SPACING.lg,
     ...SHADOWS.sm,
   },
   modalOptionSelected: {
-    borderColor: COLORS.primary,
     backgroundColor: '#E6F3FF',
+    borderColor: COLORS.primary,
   },
   modalOptionText: {
-    fontSize: FONT_SIZES.base,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.base,
     fontWeight: '500',
     textAlign: 'center',
   },

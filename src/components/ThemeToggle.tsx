@@ -18,7 +18,6 @@ const ThemeToggle: React.FC<ThemeToggleProps> = memo(({
 
   const themeOptions = [
     { value: 'light', label: '라이트', icon: '☀️' },
-    { value: 'dark', label: '다크', icon: '🌙' },
     { value: 'auto', label: '자동', icon: '🔄' }
   ];
 
@@ -79,28 +78,28 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
   },
+  currentMode: {
+    fontWeight: '500',
+    marginTop: SPACING.sm,
+  },
   label: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     marginBottom: SPACING.sm,
   },
-  toggleContainer: {
-    flexDirection: 'row',
-    borderRadius: BORDER_RADIUS.lg,
-    padding: 2,
-  },
   option: {
+    alignItems: 'center',
     borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
-    alignItems: 'center',
     marginHorizontal: 1,
   },
   optionIcon: {
     textAlign: 'center',
   },
-  currentMode: {
-    marginTop: SPACING.sm,
-    fontWeight: '500',
+  toggleContainer: {
+    borderRadius: BORDER_RADIUS.lg,
+    flexDirection: 'row',
+    padding: 2,
   },
 });
 

@@ -173,36 +173,36 @@ const ActionButton: React.FC<ActionButtonProps> = memo(({
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    justifyContent: 'center',
     borderWidth: 1,
+    justifyContent: 'center',
     ...SHADOWS.sm,
   },
-  outlineButton: {
-    borderWidth: 2,
-    backgroundColor: 'transparent',
+  content: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   disabled: {
     opacity: 0.6,
     ...SHADOWS.none,
   },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   icon: {
     fontSize: FONT_SIZES.lg,
+    marginRight: SPACING.sm,
+  },
+  loadingText: {
+    marginLeft: SPACING.sm,
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+  },
+  spinner: {
     marginRight: SPACING.sm,
   },
   text: {
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  loadingText: {
-    marginLeft: SPACING.sm,
-  },
-  spinner: {
-    marginRight: SPACING.sm,
   },
 });
 

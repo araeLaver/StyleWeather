@@ -10,23 +10,41 @@ interface RecommendationCardProps {
   onRefresh?: () => void;
   loading?: boolean;
   style?: any;
+  userGender?: 'male' | 'female' | 'other';
 }
 
-// 아이템 정보 정의 (메모화를 위해 컴포넌트 외부에 정의)
-const OUTFIT_ITEMS = [
-  { key: 'top', label: '👕 상의', icon: '👔' },
-  { key: 'bottom', label: '👖 하의', icon: '👖' },
-  { key: 'outer', label: '🧥 아우터', icon: '🧥' },
-  { key: 'shoes', label: '👟 신발', icon: '👟' },
-  { key: 'accessories', label: '👜 악세서리', icon: '💎' }
-] as const;
+// 성별별 아이템 정보 정의
+const OUTFIT_ITEMS = {
+  male: [
+    { key: 'top', label: '👔 상의', icon: '👔' },
+    { key: 'bottom', label: '👖 하의', icon: '👖' },
+    { key: 'outer', label: '🧥 아우터', icon: '🧥' },
+    { key: 'shoes', label: '👞 신발', icon: '👞' },
+    { key: 'accessories', label: '👜 액세서리', icon: '⌚' }
+  ],
+  female: [
+    { key: 'top', label: '👚 상의', icon: '👚' },
+    { key: 'bottom', label: '👗 하의', icon: '👗' },
+    { key: 'outer', label: '🧥 아우터', icon: '🧥' },
+    { key: 'shoes', label: '👠 신발', icon: '👠' },
+    { key: 'accessories', label: '💎 액세서리', icon: '💎' }
+  ],
+  other: [
+    { key: 'top', label: '👕 상의', icon: '👕' },
+    { key: 'bottom', label: '👖 하의', icon: '👖' },
+    { key: 'outer', label: '🧥 아우터', icon: '🧥' },
+    { key: 'shoes', label: '👟 신발', icon: '👟' },
+    { key: 'accessories', label: '👜 액세서리', icon: '💎' }
+  ]
+} as const;
 
 const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
   recommendation,
   onFeedback,
   onRefresh,
   loading = false,
-  style
+  style,
+  userGender = 'male'
 }) => {
   // 테마 컨텍스트
   const { colors, isDarkMode } = useThemeContext();
@@ -36,13 +54,14 @@ const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
     return Math.round(recommendation.confidence * 100);
   }, [recommendation.confidence]);
 
-  // 표시할 아이템들만 필터링 (메모화)
+  // 성별에 따른 아이템 선택 및 필터링 (메모화)
   const visibleItems = useMemo(() => {
-    return OUTFIT_ITEMS.filter(item => {
+    const genderItems = OUTFIT_ITEMS[userGender] || OUTFIT_ITEMS.other;
+    return genderItems.filter(item => {
       const value = recommendation[item.key as keyof StyleRecommendation];
       return value && typeof value === 'string' && value.trim().length > 0;
     });
-  }, [recommendation]);
+  }, [recommendation, userGender]);
 
   // 추천 완성도 계산 (메모화)
   const completeness = useMemo(() => {
@@ -50,12 +69,24 @@ const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
     const hasRequired = requiredItems.every(key => 
       recommendation[key as keyof StyleRecommendation]
     );
+    const genderItems = OUTFIT_ITEMS[userGender] || OUTFIT_ITEMS.other;
     return {
       hasRequired,
       totalItems: visibleItems.length,
-      score: Math.round((visibleItems.length / OUTFIT_ITEMS.length) * 100)
+      score: Math.round((visibleItems.length / genderItems.length) * 100)
     };
-  }, [recommendation, visibleItems]);
+  }, [recommendation, visibleItems, userGender]);
+
+  // 성별에 따른 제목 생성
+  const genderTitle = useMemo(() => {
+    const titles = {
+      male: '🧑 남성 코디 추천',
+      female: '👩 여성 코디 추천', 
+      other: '👤 스타일 추천'
+    };
+    return titles[userGender] || titles.other;
+  }, [userGender]);
+
 
   // 피드백 핸들러 (메모화)
   const handleLike = useCallback(() => {
@@ -69,16 +100,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
   }, [onFeedback]);
 
   const handleDislike = useCallback(() => {
-    console.log('다른 추천 버튼 클릭됨');
+    console.log('🎆 다른 추천 버튼 클릭됨');
     onFeedback?.('dislike');
-    // 싫어요 시 새로운 추천 자동 생성
     onRefresh?.();
     Alert.alert(
       '새로운 추천을 준비했어요!',
       '🎆 더 마음에 드는 스타일로 추천했어요!',
       [{ text: '고마워요', style: 'default' }]
     );
-  }, [onFeedback]);
+  }, [onFeedback, onRefresh]);
 
   const handleRefresh = useCallback(() => {
     if (loading) return;
@@ -100,7 +130,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
       {/* 헤더 */}
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: colors.text.primary }]}>✨ AI 코디 추천</Text>
+          <Text style={[styles.title, { color: colors.text.primary }]}>{genderTitle}</Text>
           {generatedTime && (
             <Text style={[styles.timestamp, { color: colors.text.secondary }]}>{generatedTime} 생성</Text>
           )}
@@ -169,6 +199,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
             style={[styles.actionButton, styles.dislikeButton]}
             onPress={handleDislike}
             disabled={loading}
+            activeOpacity={0.7}
           >
             <Text style={[styles.actionButtonText, { color: colors.text.inverse }]}>🎆 다른 추천</Text>
           </TouchableOpacity>
@@ -188,30 +219,53 @@ const RecommendationCard: React.FC<RecommendationCardProps> = memo(({
 });
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    ...SHADOWS.md,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.md,
-  },
-  titleContainer: {
+  actionButton: {
+    alignItems: 'center',
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 2,
     flex: 1,
+    marginHorizontal: 2,
+    minWidth: '30%',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.md,
   },
-  title: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
+  actionButtonText: {
     color: COLORS.text.primary,
-    marginBottom: SPACING.xs,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: 'bold',
   },
-  timestamp: {
-    fontSize: FONT_SIZES.xs,
+  actionButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    justifyContent: 'space-between',
+  },
+  buttonDisabled: {
+    backgroundColor: COLORS.gray[100],
+    borderColor: COLORS.gray[300],
+    opacity: 0.6,
+  },
+  buttonTextDisabled: {
     color: COLORS.text.secondary,
+  },
+  completenessBar: {
+    backgroundColor: COLORS.gray[200],
+    borderRadius: BORDER_RADIUS.sm,
+    height: 4,
+    marginBottom: SPACING.xs,
+    overflow: 'hidden',
+  },
+  completenessContainer: {
+    marginBottom: SPACING.lg,
+  },
+  completenessProgress: {
+    backgroundColor: COLORS.primary,
+    height: '100%',
+  },
+  completenessText: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    textAlign: 'center',
   },
   confidenceBadge: {
     backgroundColor: COLORS.success,
@@ -224,23 +278,43 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
   },
-  completenessContainer: {
-    marginBottom: SPACING.lg,
+  container: {
+    backgroundColor: COLORS.white,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    ...SHADOWS.md,
   },
-  completenessBar: {
-    height: 4,
-    backgroundColor: COLORS.gray[200],
-    borderRadius: BORDER_RADIUS.sm,
-    overflow: 'hidden',
-    marginBottom: SPACING.xs,
+  dislikeButton: {
+    backgroundColor: '#FEE2E2',
+    borderColor: COLORS.error,
   },
-  completenessProgress: {
-    height: '100%',
-    backgroundColor: COLORS.primary,
+  feedbackSection: {
+    borderTopColor: COLORS.gray[200],
+    borderTopWidth: 1,
+    paddingTop: SPACING.md,
   },
-  completenessText: {
-    fontSize: FONT_SIZES.xs,
+  feedbackTitle: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.base,
+    fontWeight: 'bold',
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  header: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+  },
+  likeButton: {
+    backgroundColor: '#D1FAE5',
+    borderColor: COLORS.success,
+  },
+  outfitCategory: {
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+    marginBottom: SPACING.xs,
     textAlign: 'center',
   },
   outfitGrid: {
@@ -249,120 +323,77 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: SPACING.lg,
   },
-  outfitItem: {
-    width: '48%',
-    backgroundColor: COLORS.gray[50],
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.gray[200],
-    minHeight: 100,
-  },
   outfitIcon: {
     fontSize: 32,
     marginBottom: SPACING.xs,
   },
-  outfitCategory: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
-    color: COLORS.text.secondary,
-    marginBottom: SPACING.xs,
-    textAlign: 'center',
+  outfitItem: {
+    alignItems: 'center',
+    backgroundColor: COLORS.gray[50],
+    borderColor: COLORS.gray[200],
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 2,
+    marginBottom: SPACING.md,
+    minHeight: 100,
+    padding: SPACING.md,
+    width: '48%',
   },
   outfitText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    textAlign: 'center',
     lineHeight: 18,
+    textAlign: 'center',
   },
   reasonContainer: {
     backgroundColor: '#FEF3C7',
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    borderLeftWidth: 4,
     borderLeftColor: COLORS.warning,
-  },
-  reasonTitle: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: 'bold',
-    color: '#92400E',
-    marginBottom: SPACING.xs,
+    borderLeftWidth: 4,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.lg,
+    padding: SPACING.md,
   },
   reasonText: {
-    fontSize: FONT_SIZES.sm,
     color: '#92400E',
+    fontSize: FONT_SIZES.sm,
     lineHeight: 20,
   },
-  feedbackSection: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.gray[200],
-    paddingTop: SPACING.md,
-  },
-  feedbackTitle: {
-    fontSize: FONT_SIZES.base,
+  reasonTitle: {
+    color: '#92400E',
+    fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
-    textAlign: 'center',
-    marginBottom: SPACING.md,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-  },
-  actionButton: {
-    flex: 1,
-    borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    alignItems: 'center',
-    borderWidth: 2,
-    minWidth: '30%',
-    marginHorizontal: 2,
-  },
-  likeButton: {
-    backgroundColor: '#D1FAE5',
-    borderColor: COLORS.success,
-  },
-  dislikeButton: {
-    backgroundColor: '#FEE2E2',
-    borderColor: COLORS.error,
+    marginBottom: SPACING.xs,
   },
   refreshButton: {
     backgroundColor: '#EDE9FE',
     borderColor: '#8B5CF6',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-    backgroundColor: COLORS.gray[100],
-    borderColor: COLORS.gray[300],
-  },
-  actionButtonText: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-  },
-  buttonTextDisabled: {
+  timestamp: {
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+  },
+  title: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    marginBottom: SPACING.xs,
+  },
+  titleContainer: {
+    flex: 1,
   },
   warningContainer: {
     backgroundColor: '#FEF2F2',
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginTop: SPACING.md,
-    borderWidth: 1,
     borderColor: COLORS.error,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginTop: SPACING.md,
+    padding: SPACING.md,
   },
   warningText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.error,
-    textAlign: 'center',
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

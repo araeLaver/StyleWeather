@@ -20,8 +20,8 @@ import RecommendationCard from '../components/optimized/RecommendationCard';
 import OfflineIndicator from '../components/OfflineIndicator';
 import type { NavigationProp } from '@react-navigation/native';
 import type { Schedule, WeatherData } from '../types';
-import type { WeatherBasedRecommendation } from '../types/shopping';
-import ShoppingService from '../services/ShoppingService';
+import type { WeatherBasedRecommendation } from '../services/RealProductService';
+import RealProductService from '../services/RealProductService';
 import ShoppingRecommendationCard from '../components/optimized/ShoppingRecommendationCard';
 
 const { width } = Dimensions.get('window');
@@ -58,6 +58,7 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
   const [slideAnim] = useState(new Animated.Value(50));
   const [shoppingRecommendation, setShoppingRecommendation] = useState<WeatherBasedRecommendation | null>(null);
   const [shoppingLoading, setShoppingLoading] = useState(false);
+  const [mockRecommendationIndex, setMockRecommendationIndex] = useState(0);
 
   // 테마 컨텍스트
   const { colors, isDarkMode } = useThemeContext();
@@ -150,15 +151,60 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
     }
   }, [refreshWeather, loadLocationAndWeather]);
 
+  // 여러 Mock 추천 데이터
+  const mockRecommendations = useMemo(() => [
+    {
+      top: '유니클로 에어리즘 UV 컷 티셔츠',
+      bottom: '리바이스 511 슬림핏 청바지', 
+      outer: '스파오 가벼운 린넨 가디건',
+      shoes: '아디다스 스탠스미스 스니커즈',
+      accessories: '심플한 실버 시계',
+      reason: '오늘의 날씨에 맞는 시원하고 편안한 코디를 추천합니다.',
+      confidence: 0.85,
+      timestamp: Date.now(),
+      weatherCondition: currentWeather?.description || '맑음',
+      temperature: currentWeather?.temperature || 22,
+      occasion: 'casual'
+    },
+    {
+      top: '지오다노 코튼 블렌드 셔츠',
+      bottom: '유니클로 치노 팬츠',
+      outer: '탑텐 베이직 블레이저',
+      shoes: '나이키 에어맥스 스니커즈', 
+      accessories: '가죽 벨트',
+      reason: '비즈니스 캐주얼에 적합한 깔끔한 스타일입니다.',
+      confidence: 0.78,
+      timestamp: Date.now(),
+      weatherCondition: currentWeather?.description || '맑음',
+      temperature: currentWeather?.temperature || 22,
+      occasion: 'business'
+    },
+    {
+      top: '스파오 오버핏 니트',
+      bottom: '지오다노 데님 팬츠',
+      outer: '에잇세컨즈 코듀로이 자켓',
+      shoes: '컨버스 척테일러 스니커즈',
+      accessories: '베레모, 크로스백',
+      reason: '트렌디하고 개성있는 스트릿 스타일을 제안합니다.',
+      confidence: 0.82,
+      timestamp: Date.now(),
+      weatherCondition: currentWeather?.description || '맑음', 
+      temperature: currentWeather?.temperature || 22,
+      occasion: 'date'
+    }
+  ], [currentWeather]);
+
   const handleNewRecommendation = useCallback(async () => {
     try {
-      await refreshCurrentRecommendation();
+      console.log('🔄 새로운 추천 생성 중...');
+      // Mock 추천 인덱스 변경
+      setMockRecommendationIndex(prev => (prev + 1) % mockRecommendations.length);
       Alert.alert('성공', '🔄 새로운 추천을 생성했습니다!');
     } catch (error) {
       console.error('새 추천 실패:', error);
       Alert.alert('오류', '추천 생성에 실패했습니다. 다시 시도해주세요.');
     }
-  }, [refreshCurrentRecommendation]);
+  }, [mockRecommendations.length]);
 
   const handleRecommendationFeedback = useCallback(async (type: 'like' | 'dislike') => {
     await submitFeedback(type);
@@ -166,11 +212,11 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
 
   // 쇼핑 추천 초기 로드
   const loadShoppingRecommendations = useCallback(async () => {
-    if (!currentWeather) return;
+    if (!currentWeather || !preferences) return;
     
     try {
       setShoppingLoading(true);
-      const recommendation = await ShoppingService.getWeatherBasedRecommendations(
+      const recommendation = await RealProductService.getWeatherBasedRecommendations(
         currentWeather,
         preferences
       );
@@ -184,18 +230,58 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
 
   // 쇼핑 추천 새로고침
   const handleRefreshShopping = useCallback(async () => {
+    console.log('쇼핑 추천 새로고침 버튼 클릭됨');
     await loadShoppingRecommendations();
   }, [loadShoppingRecommendations]);
 
+  // 상품 클릭 핸들러
+  const handleProductPress = useCallback(async (product: any) => {
+    console.log('HomeScreen 상품 클릭:', product.name, product.productUrl);
+    try {
+      const url = product.affiliate?.trackingUrl || product.productUrl;
+      console.log('HomeScreen에서 열려는 URL:', url);
+      
+      if (!url) {
+        Alert.alert('오류', '상품 링크가 없습니다.');
+        return;
+      }
+      
+      // 웹 환경에서는 window.open 사용
+      if (typeof window !== 'undefined' && window.open) {
+        console.log('window.open으로 링크 열기');
+        window.open(url, '_blank');
+        return;
+      }
+      
+      // 모바일 환경에서는 Linking 사용
+      const { Linking } = require('react-native');
+      console.log('Linking.openURL로 링크 열기');
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+        console.log('링크 열기 성공');
+      } else {
+        console.log('URL 지원 안됨:', url);
+        Alert.alert('오류', '링크를 열 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('상품 링크 열기 실패:', error);
+      Alert.alert('오류', `링크를 열 수 없습니다: ${error}`);
+    }
+  }, []);
+
   const navigateToSchedule = useCallback(() => {
+    console.log('일정 페이지 이동 버튼 클릭됨');
     navigation.navigate('Schedule');
   }, [navigation]);
 
   const navigateToSettings = useCallback(() => {
+    console.log('설정 페이지 이동 버튼 클릭됨');
     navigation.navigate('Settings');
   }, [navigation]);
 
   const navigateToAnalytics = useCallback(() => {
+    console.log('분석 페이지 이동 버튼 클릭됨');
     navigation.navigate('Analytics');
   }, [navigation]);
 
@@ -227,10 +313,10 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
 
   // 자동 추천 생성
   useEffect(() => {
-    if (currentWeather && !recommendation && !loading && preferences.autoRecommendation) {
+    if (currentWeather && !recommendation && !loading && preferences?.autoRecommendation) {
       generateRecommendation();
     }
-  }, [currentWeather, recommendation, loading, preferences.autoRecommendation, generateRecommendation]);
+  }, [currentWeather, recommendation, loading, preferences?.autoRecommendation, generateRecommendation]);
 
   // 쇼핑 추천 자동 로드
   useEffect(() => {
@@ -320,16 +406,15 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
       </Animated.View>
 
       {/* 추천 카드 */}
-      {recommendation && (
-        <Animated.View style={[styles.cardContainer, { opacity: fadeAnim }]}>
-          <RecommendationCard 
-            recommendation={recommendation}
-            onFeedback={handleRecommendationFeedback}
-            onRefresh={handleNewRecommendation}
-            loading={recommendationLoading}
-          />
-        </Animated.View>
-      )}
+      <Animated.View style={[styles.cardContainer, { opacity: fadeAnim }]}>
+        <RecommendationCard 
+          recommendation={recommendation || mockRecommendations[mockRecommendationIndex]}
+          onFeedback={handleRecommendationFeedback}
+          onRefresh={handleNewRecommendation}
+          loading={recommendationLoading}
+          userGender={preferences?.gender || 'male'}
+        />
+      </Animated.View>
 
       {/* 쇼핑 추천 카드 */}
       {shoppingRecommendation && (
@@ -337,6 +422,7 @@ const HomeScreen: React.FC<HomeScreenProps> = memo(({ navigation }) => {
           <ShoppingRecommendationCard 
             recommendation={shoppingRecommendation}
             onRefresh={handleRefreshShopping}
+            onProductPress={handleProductPress}
             loading={shoppingLoading}
           />
         </Animated.View>
@@ -478,9 +564,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
   },
   loadingText: {
     fontSize: FONT_SIZES.lg,
@@ -489,17 +575,17 @@ const styles = StyleSheet.create({
   
   // === 헤더 스타일 ===
   header: {
-    paddingTop: 50,
-    paddingBottom: SPACING.lg,
-    paddingHorizontal: SPACING.lg,
     borderBottomLeftRadius: BORDER_RADIUS['2xl'],
     borderBottomRightRadius: BORDER_RADIUS['2xl'],
+    paddingBottom: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 50,
     ...SHADOWS.md,
   },
   headerTop: {
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: SPACING.xl,
   },
   titleSection: {
@@ -510,30 +596,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   greetingText: {
-    fontSize: FONT_SIZES.base,
     color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: FONT_SIZES.base,
     fontWeight: '500',
     marginBottom: SPACING.xs,
   },
   appTitle: {
+    color: COLORS.white,
     fontSize: FONT_SIZES['2xl'],
     fontWeight: 'bold',
-    color: COLORS.white,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   currentTime: {
-    fontSize: FONT_SIZES['3xl'],
     color: COLORS.white,
+    fontSize: FONT_SIZES['3xl'],
     fontWeight: 'bold',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   currentDate: {
-    fontSize: FONT_SIZES.sm,
     color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     marginTop: 4,
     textAlign: 'right',
@@ -541,13 +627,12 @@ const styles = StyleSheet.create({
   weatherSummary: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.lg,
     marginTop: SPACING.lg,
-    backdropFilter: 'blur(10px)',
+    padding: SPACING.lg,
   },
   weatherMainInfo: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginBottom: SPACING.md,
   },
   temperatureSection: {
@@ -555,12 +640,12 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.md,
   },
   weatherSubInfo: {
+    alignItems: 'center',
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderTopWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
   },
   weatherIcon: {
     fontSize: 72,
@@ -577,19 +662,19 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   weatherDescription: {
-    fontSize: FONT_SIZES.base,
     color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: FONT_SIZES.base,
     fontWeight: '600',
     marginTop: 2,
   },
   location: {
-    fontSize: FONT_SIZES.sm,
     color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: FONT_SIZES.sm,
     fontWeight: '500',
   },
   feelsLike: {
-    fontSize: FONT_SIZES.sm,
     color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: FONT_SIZES.sm,
     fontWeight: '500',
   },
 
@@ -605,9 +690,9 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   actionSectionTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.md,
   },
   actionButtons: {
@@ -616,11 +701,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   actionButton: {
-    flex: 1,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginHorizontal: SPACING.xs,
     alignItems: 'center',
+    borderRadius: BORDER_RADIUS.lg,
+    flex: 1,
+    marginHorizontal: SPACING.xs,
+    padding: SPACING.lg,
     ...SHADOWS.sm,
   },
   scheduleButton: {
@@ -657,30 +742,30 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   scheduleSectionHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: SPACING.md,
   },
   scheduleSectionTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
   },
   scheduleViewAllButton: {
-    paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
   },
   scheduleViewAllText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.info,
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
   },
   noScheduleContainer: {
+    alignItems: 'center',
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.xl,
-    alignItems: 'center',
     ...SHADOWS.sm,
   },
   noScheduleIcon: {
@@ -688,15 +773,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   noScheduleText: {
-    fontSize: FONT_SIZES.base,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.base,
     marginBottom: SPACING.md,
   },
   addScheduleButton: {
     backgroundColor: COLORS.info,
     borderRadius: BORDER_RADIUS.xl,
-    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
   },
   addScheduleButtonText: {
     color: COLORS.white,
@@ -709,35 +794,35 @@ const styles = StyleSheet.create({
   scheduleCard: {
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
     marginRight: SPACING.md,
+    padding: SPACING.md,
     width: 140,
     ...SHADOWS.sm,
   },
   scheduleCardHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: SPACING.sm,
   },
   scheduleTime: {
+    color: COLORS.info,
     fontSize: FONT_SIZES.xs,
     fontWeight: 'bold',
-    color: COLORS.info,
   },
   scheduleType: {
     fontSize: 16,
   },
   scheduleCardTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    color: COLORS.text.primary,
-    marginBottom: SPACING.xs,
     lineHeight: 18,
+    marginBottom: SPACING.xs,
   },
   scheduleLocation: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
     marginBottom: SPACING.xs,
   },
   scheduleStylePreview: {
@@ -746,26 +831,26 @@ const styles = StyleSheet.create({
     padding: SPACING.xs,
   },
   scheduleStyleText: {
-    fontSize: FONT_SIZES.xs - 1,
     color: COLORS.gray[600],
+    fontSize: FONT_SIZES.xs - 1,
     textAlign: 'center',
   },
   moreSchedulesCard: {
+    alignItems: 'center',
     backgroundColor: COLORS.gray[50],
+    borderColor: COLORS.gray[200],
     borderRadius: BORDER_RADIUS.md,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    justifyContent: 'center',
     padding: SPACING.md,
     width: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.gray[200],
-    borderStyle: 'dashed',
   },
   moreSchedulesText: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.text.secondary,
-    textAlign: 'center',
+    fontSize: FONT_SIZES.xs,
     fontWeight: '600',
+    textAlign: 'center',
   },
 
   // === 기타 ===

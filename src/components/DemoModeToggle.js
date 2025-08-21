@@ -218,21 +218,15 @@ const DemoModeToggle = ({ visible, onClose }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  actionButton: {
     alignItems: 'center',
-    backgroundColor: '#2d3748',
+    backgroundColor: '#38a169',
+    borderRadius: 8,
     padding: 16,
-    paddingTop: 50,
   },
-  headerTitle: {
+  actionButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   closeButton: {
@@ -246,81 +240,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  container: {
+    backgroundColor: '#f8f9fa',
+    flex: 1,
+  },
   content: {
     flex: 1,
     padding: 16,
   },
-  section: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2d3748',
-    marginBottom: 8,
-  },
-  sectionDescription: {
-    fontSize: 14,
-    color: '#718096',
-    lineHeight: 20,
-  },
   currentSelection: {
-    fontSize: 14,
     color: '#4299e1',
-    marginBottom: 12,
-    fontWeight: '600',
-  },
-  optionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  optionButton: {
-    width: '48%',
-    backgroundColor: '#f7fafc',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  optionButtonSelected: {
-    backgroundColor: '#4299e1',
-    borderColor: '#3182ce',
-  },
-  optionButtonText: {
-    fontSize: 12,
-    color: '#4a5568',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  optionButtonTextSelected: {
-    color: 'white',
-  },
-  actionButton: {
-    backgroundColor: '#38a169',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: 'white',
     fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  header: {
+    alignItems: 'center',
+    backgroundColor: '#2d3748',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    paddingTop: 50,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 18,
     fontWeight: 'bold',
   },
   infoContainer: {
@@ -329,9 +273,65 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   infoText: {
-    fontSize: 12,
     color: '#4a5568',
+    fontSize: 12,
     lineHeight: 18,
+  },
+  optionButton: {
+    alignItems: 'center',
+    backgroundColor: '#f7fafc',
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 8,
+    padding: 12,
+    width: '48%',
+  },
+  optionButtonSelected: {
+    backgroundColor: '#4299e1',
+    borderColor: '#3182ce',
+  },
+  optionButtonText: {
+    color: '#4a5568',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  optionButtonTextSelected: {
+    color: 'white',
+  },
+  optionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  section: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 3,
+    marginBottom: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  sectionDescription: {
+    color: '#718096',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    color: '#2d3748',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
 });
 

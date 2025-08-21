@@ -131,51 +131,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoIcon: {
-    fontSize: 80,
-    marginBottom: 16,
-  },
-  logoText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'white',
-    letterSpacing: 1,
-  },
-  textContainer: {
-    alignItems: 'center',
-    marginBottom: 60,
-  },
-  tagline: {
-    fontSize: 18,
-    color: '#a0aec0',
-    marginBottom: 8,
-    fontWeight: '600',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#718096',
-    textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 280,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-  },
-  loadingDots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: '#4299e1',
+    borderRadius: 4,
+    height: 8,
     marginHorizontal: 4,
+    width: 8,
   },
   dot1: {
     opacity: 0.4,
@@ -187,14 +148,53 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   footer: {
-    position: 'absolute',
-    bottom: 50,
     alignItems: 'center',
+    bottom: 50,
+    position: 'absolute',
   },
   footerText: {
-    fontSize: 12,
     color: '#718096',
+    fontSize: 12,
     letterSpacing: 0.5,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+  },
+  loadingDots: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoIcon: {
+    fontSize: 80,
+    marginBottom: 16,
+  },
+  logoText: {
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  subtitle: {
+    color: '#718096',
+    fontSize: 14,
+    lineHeight: 20,
+    maxWidth: 280,
+    textAlign: 'center',
+  },
+  tagline: {
+    color: '#a0aec0',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginBottom: 60,
   },
 });
 

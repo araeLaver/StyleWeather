@@ -151,96 +151,98 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background.primary,
-    justifyContent: 'center',
+  actions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    justifyContent: 'space-between',
+    marginBottom: SPACING.lg,
+  },
+  button: {
     alignItems: 'center',
+    borderRadius: BORDER_RADIUS.md,
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+  },
+  componentStack: {
+    color: COLORS.text.secondary,
+    fontFamily: 'monospace',
+    fontSize: FONT_SIZES.xs - 1,
+  },
+  componentStackContainer: {
+    borderTopColor: COLORS.gray[200],
+    borderTopWidth: 1,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+  },
+  componentStackTitle: {
+    color: COLORS.warning,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+    marginBottom: SPACING.xs,
+  },
+  container: {
+    alignItems: 'center',
+    backgroundColor: COLORS.background.primary,
+    flex: 1,
+    justifyContent: 'center',
     padding: SPACING.xl,
   },
   errorCard: {
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.xl,
     maxWidth: 400,
+    padding: SPACING.xl,
     width: '100%',
     ...SHADOWS.md,
+  },
+  errorDetails: {
+    backgroundColor: COLORS.gray[50],
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.xl,
+    maxHeight: 200,
+    padding: SPACING.md,
+  },
+  errorDetailsTitle: {
+    color: COLORS.error,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: 'bold',
+    marginBottom: SPACING.sm,
+  },
+  errorIcon: {
+    fontSize: 48,
+  },
+  errorMessage: {
+    color: COLORS.error,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+    marginBottom: SPACING.sm,
+  },
+  errorStack: {
+    color: COLORS.text.secondary,
+    fontFamily: 'monospace',
+    fontSize: FONT_SIZES.xs - 1,
+    marginBottom: SPACING.sm,
+  },
+  helpText: {
+    color: COLORS.text.disabled,
+    fontSize: FONT_SIZES.xs,
+    lineHeight: 18,
+    textAlign: 'center',
   },
   iconContainer: {
     alignItems: 'center',
     marginBottom: SPACING.lg,
   },
-  errorIcon: {
-    fontSize: 48,
+  reportButton: {
+    backgroundColor: COLORS.gray[100],
+    borderColor: COLORS.gray[300],
+    borderWidth: 1,
   },
-  title: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
+  reportButtonText: {
     color: COLORS.text.primary,
-    textAlign: 'center',
-    marginBottom: SPACING.md,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.base,
-    color: COLORS.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: SPACING.xl,
-  },
-  errorDetails: {
-    backgroundColor: COLORS.gray[50],
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.xl,
-    maxHeight: 200,
-  },
-  errorDetailsTitle: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: 'bold',
-    color: COLORS.error,
-    marginBottom: SPACING.sm,
-  },
-  errorMessage: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.error,
-    fontWeight: 'bold',
-    marginBottom: SPACING.sm,
-  },
-  errorStack: {
-    fontSize: FONT_SIZES.xs - 1,
-    color: COLORS.text.secondary,
-    fontFamily: 'monospace',
-    marginBottom: SPACING.sm,
-  },
-  componentStackContainer: {
-    marginTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.gray[200],
-    paddingTop: SPACING.sm,
-  },
-  componentStackTitle: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: 'bold',
-    color: COLORS.warning,
-    marginBottom: SPACING.xs,
-  },
-  componentStack: {
-    fontSize: FONT_SIZES.xs - 1,
-    color: COLORS.text.secondary,
-    fontFamily: 'monospace',
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.lg,
-    gap: SPACING.md,
-  },
-  button: {
-    flex: 1,
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    alignItems: 'center',
+    fontWeight: '600',
   },
   retryButton: {
     backgroundColor: COLORS.primary,
@@ -250,21 +252,19 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
   },
-  reportButton: {
-    backgroundColor: COLORS.gray[100],
-    borderWidth: 1,
-    borderColor: COLORS.gray[300],
-  },
-  reportButtonText: {
-    color: COLORS.text.primary,
-    fontSize: FONT_SIZES.sm,
-    fontWeight: '600',
-  },
-  helpText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.disabled,
+  subtitle: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.base,
+    lineHeight: 24,
+    marginBottom: SPACING.xl,
     textAlign: 'center',
-    lineHeight: 18,
+  },
+  title: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.xl,
+    fontWeight: 'bold',
+    marginBottom: SPACING.md,
+    textAlign: 'center',
   },
 });
 

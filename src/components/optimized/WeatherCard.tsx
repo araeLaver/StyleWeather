@@ -40,7 +40,7 @@ const WeatherCard: React.FC<WeatherCardProps> = memo(({ weather, showDetails = t
   
   const feelsLikeStyle = useMemo(() => getTempColorStyle(weather.feelsLike), [weather.feelsLike]);
   
-  const weatherIcon = useMemo(() => WEATHER_ICONS[weather.icon] || '🌤️', [weather.icon]);
+  const weatherIcon = useMemo(() => (WEATHER_ICONS as Record<string, string>)[weather.icon] || '🌤️', [weather.icon]);
   
   const backgroundColor = useMemo(() => getWeatherBackground(weather.icon), [weather.icon]);
   
@@ -139,24 +139,80 @@ const styles = StyleSheet.create({
     ...SHADOWS.md,
     overflow: 'hidden',
   },
-  header: {
+  description: {
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '600',
+    marginBottom: SPACING.xs,
+  },
+  detailIcon: {
+    fontSize: 24,
+    marginBottom: SPACING.xs,
+  },
+  detailItem: {
+    alignItems: 'center',
+    backgroundColor: COLORS.gray[50],
+    borderColor: COLORS.gray[200],
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+    padding: SPACING.md,
+    width: '48%',
+  },
+  detailLabel: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    marginBottom: SPACING.xs,
+  },
+  detailValue: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.base,
+    fontWeight: 'bold',
+  },
+  detailsContainer: {
     padding: SPACING.lg,
+  },
+  detailsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  detailsTitle: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    marginBottom: SPACING.md,
+  },
+  header: {
     borderTopLeftRadius: BORDER_RADIUS.lg,
     borderTopRightRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+  },
+  location: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '500',
   },
   mainInfo: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
   },
-  weatherIcon: {
-    fontSize: 64,
-    marginRight: SPACING.md,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+  mockIndicator: {
+    alignItems: 'center',
+    backgroundColor: COLORS.warning,
+    padding: SPACING.xs,
   },
-  temperatureContainer: {
-    flex: 1,
+  mockText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+  },
+  staleIndicator: {
+    color: COLORS.warning,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
+    marginTop: SPACING.xs,
   },
   temperature: {
     fontSize: FONT_SIZES['4xl'],
@@ -166,71 +222,15 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  description: {
-    fontSize: FONT_SIZES.lg,
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontWeight: '600',
-    marginBottom: SPACING.xs,
+  temperatureContainer: {
+    flex: 1,
   },
-  location: {
-    fontSize: FONT_SIZES.sm,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: '500',
-  },
-  staleIndicator: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.warning,
-    fontWeight: 'bold',
-    marginTop: SPACING.xs,
-  },
-  detailsContainer: {
-    padding: SPACING.lg,
-  },
-  detailsTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: SPACING.md,
-  },
-  detailsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  detailItem: {
-    width: '48%',
-    backgroundColor: COLORS.gray[50],
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.gray[200],
-  },
-  detailIcon: {
-    fontSize: 24,
-    marginBottom: SPACING.xs,
-  },
-  detailLabel: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
-    fontWeight: '600',
-    marginBottom: SPACING.xs,
-  },
-  detailValue: {
-    fontSize: FONT_SIZES.base,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-  },
-  mockIndicator: {
-    backgroundColor: COLORS.warning,
-    padding: SPACING.xs,
-    alignItems: 'center',
-  },
-  mockText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.white,
-    fontWeight: 'bold',
+  weatherIcon: {
+    fontSize: 64,
+    marginRight: SPACING.md,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
 });
 

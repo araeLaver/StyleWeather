@@ -111,7 +111,7 @@ class WeatherService {
 
   // 날씨 기반 옷차림 추천 로직
   getClothingRecommendation(temperature, weatherCondition, humidity) {
-    let recommendation = [];
+    const recommendation = [];
 
     // 온도 기반 추천
     if (temperature >= 28) {

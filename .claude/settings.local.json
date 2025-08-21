@@ -2,7 +2,19 @@
   "permissions": {
     "allow": [
       "Bash(git --version)",
-      "WebFetch(domain:git-scm.com)"
+      "WebFetch(domain:git-scm.com)",
+      "Bash(git remote add:*)",
+      "Bash(npm start)",
+      "Bash(npm run update:deps:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npx react-native log-android:*)",
+      "Bash(npx expo start:*)",
+      "Bash(npm start:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

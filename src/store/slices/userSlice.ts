@@ -168,9 +168,15 @@ const userSlice = createSlice({
     
     // 일정 업데이트
     updateSchedule: (state, action: PayloadAction<{ id: string; updates: Partial<Schedule> }>) => {
+      console.log('Redux updateSchedule 실행:', action.payload.id, action.payload.updates);
       const index = state.schedules.findIndex(s => s.id === action.payload.id);
+      console.log('찾은 일정 인덱스:', index);
       if (index !== -1) {
+        console.log('기존 일정:', state.schedules[index]);
         state.schedules[index] = { ...state.schedules[index], ...action.payload.updates };
+        console.log('업데이트된 일정:', state.schedules[index]);
+      } else {
+        console.log('일정을 찾을 수 없음');
       }
     },
     

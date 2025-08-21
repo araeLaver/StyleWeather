@@ -35,38 +35,38 @@ const LoadingSpinner = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f8f9fa',
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: width,
-    height: height,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 1000,
+    flex: 1,
+    justifyContent: 'center',
   },
   content: {
+    alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 12,
+    elevation: 5,
     padding: 24,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
+  },
+  message: {
+    color: '#4a5568',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    height: height,
+    left: 0,
+    position: 'absolute',
+    top: 0,
+    width: width,
+    zIndex: 1000,
   },
   spinner: {
     marginBottom: 16,
-  },
-  message: {
-    fontSize: 16,
-    color: '#4a5568',
-    textAlign: 'center',
   },
 });
 

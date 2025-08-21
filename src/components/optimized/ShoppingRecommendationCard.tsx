@@ -7,16 +7,17 @@ import {
   StyleSheet,
   Alert,
   Animated,
-  RefreshControl
+  RefreshControl,
+  Linking
 } from 'react-native';
 import { COLORS, FONT_SIZES, SPACING, BORDER_RADIUS, SHADOWS } from '../../constants';
 import ProductCard from './ProductCard';
-import type { WeatherBasedRecommendation, Product } from '../../types/shopping';
+import type { WeatherBasedRecommendation, RealProduct } from '../../services/RealProductService';
 
 interface ShoppingRecommendationCardProps {
   recommendation: WeatherBasedRecommendation;
   onRefresh?: () => void;
-  onProductPress?: (product: Product) => void;
+  onProductPress?: (product: RealProduct) => void;
   loading?: boolean;
 }
 
@@ -49,19 +50,55 @@ const ShoppingRecommendationCard: React.FC<ShoppingRecommendationCardProps> = me
     }
   };
 
-  const handleProductPress = (product: Product) => {
+  const handleProductPress = (product: RealProduct) => {
+    console.log('ShoppingRecommendationCard handleProductPress:', product.name);
     if (onProductPress) {
+      console.log('onProductPress 콜백 실행');
       onProductPress(product);
     } else {
+      console.log('기본 상품 클릭 처리');
       // 기본 동작: 상품 상세 페이지로 이동하거나 외부 링크 열기
       Alert.alert(
         product.name,
         `${product.brand}의 상품입니다.\n가격: ${product.price.toLocaleString()}원\n\n${product.mallName}에서 확인하시겠습니까?`,
         [
           { text: '취소', style: 'cancel' },
-          { text: '확인', onPress: () => console.log('상품 페이지로 이동') }
+          { text: '확인', onPress: () => {
+              console.log('사용자가 확인 선택 - 상품 페이지로 이동');
+              openProductLink(product);
+            }
+          }
         ]
       );
+    }
+  };
+
+  const openProductLink = async (product: RealProduct) => {
+    try {
+      const url = product.affiliate?.trackingUrl || product.productUrl;
+      console.log('상품 링크 열기:', url);
+      
+      if (!url) {
+        Alert.alert('오류', '상품 링크가 없습니다.');
+        return;
+      }
+      
+      // 웹 환경
+      if (typeof window !== 'undefined') {
+        window.open(url, '_blank');
+        return;
+      }
+      
+      // 모바일 환경
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('오류', '링크를 열 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('상품 링크 열기 실패:', error);
+      Alert.alert('오류', '링크를 열 수 없습니다.');
     }
   };
 
@@ -84,8 +121,6 @@ const ShoppingRecommendationCard: React.FC<ShoppingRecommendationCardProps> = me
   };
 
   const displayProducts = expanded ? recommendation.products : recommendation.products.slice(0, 4);
-  const totalPrice = recommendation.products.reduce((sum, product) => sum + product.price, 0);
-  const averageRating = recommendation.products.reduce((sum, product) => sum + product.rating, 0) / recommendation.products.length;
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
@@ -128,7 +163,7 @@ const ShoppingRecommendationCard: React.FC<ShoppingRecommendationCardProps> = me
           <Text style={styles.productsTitle}>추천 상품</Text>
           <View style={styles.statsContainer}>
             <Text style={styles.statsText}>
-              ⭐ {averageRating.toFixed(1)} • 총 {totalPrice.toLocaleString()}원
+              {recommendation.products.length}개 상품
             </Text>
           </View>
         </View>
@@ -203,177 +238,177 @@ const ShoppingRecommendationCard: React.FC<ShoppingRecommendationCardProps> = me
 });
 
 const styles = StyleSheet.create({
+  actionContainer: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    justifyContent: 'space-between',
+  },
   container: {
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.lg,
     marginVertical: SPACING.md,
+    padding: SPACING.lg,
     ...SHADOWS.md,
   },
+  expandButton: {
+    alignItems: 'center',
+    backgroundColor: COLORS.gray[100],
+    borderRadius: BORDER_RADIUS.md,
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  expandButtonText: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+  },
   header: {
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.md,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: SPACING.xs,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.secondary,
-    fontWeight: '500',
-  },
-  refreshButton: {
-    padding: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.gray[50],
-  },
-  refreshIcon: {
-    fontSize: 20,
-  },
-  reasonContainer: {
-    backgroundColor: COLORS.gray[50],
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  reasonText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.primary,
-    lineHeight: 20,
-  },
-  keywordsContainer: {
     marginBottom: SPACING.md,
   },
   keywordTag: {
     backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.xl,
+    marginRight: SPACING.xs,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
-    marginRight: SPACING.xs,
   },
   keywordText: {
-    fontSize: FONT_SIZES.xs,
     color: COLORS.white,
+    fontSize: FONT_SIZES.xs,
     fontWeight: '600',
   },
-  productsContainer: {
+  keywordsContainer: {
     marginBottom: SPACING.md,
   },
-  productsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  productsTitle: {
-    fontSize: FONT_SIZES.base,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statsText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
-    fontWeight: '500',
-  },
-  productsScroll: {
-    marginVertical: SPACING.sm,
-  },
-  moreProductsCard: {
-    backgroundColor: COLORS.gray[50],
+  mallLinkButton: {
+    backgroundColor: COLORS.info,
     borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
-    width: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.gray[200],
-    borderStyle: 'dashed',
-    marginHorizontal: SPACING.xs,
+    marginRight: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
   },
-  moreProductsIcon: {
-    fontSize: 24,
-    marginBottom: SPACING.xs,
-  },
-  moreProductsText: {
+  mallLinkText: {
+    color: COLORS.white,
     fontSize: FONT_SIZES.xs,
-    color: COLORS.text.secondary,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  expandButton: {
-    backgroundColor: COLORS.gray[100],
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-  },
-  expandButtonText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text.primary,
     fontWeight: '600',
   },
   mallLinksContainer: {
     marginBottom: SPACING.md,
   },
   mallLinksTitle: {
+    color: COLORS.text.primary,
     fontSize: FONT_SIZES.sm,
     fontWeight: 'bold',
-    color: COLORS.text.primary,
     marginBottom: SPACING.sm,
   },
-  mallLinkButton: {
-    backgroundColor: COLORS.info,
+  moreProductsCard: {
+    alignItems: 'center',
+    backgroundColor: COLORS.gray[50],
+    borderColor: COLORS.gray[200],
     borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    marginRight: SPACING.xs,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    justifyContent: 'center',
+    marginHorizontal: SPACING.xs,
+    padding: SPACING.md,
+    width: 100,
   },
-  mallLinkText: {
+  moreProductsIcon: {
+    fontSize: 24,
+    marginBottom: SPACING.xs,
+  },
+  moreProductsText: {
+    color: COLORS.text.secondary,
     fontSize: FONT_SIZES.xs,
-    color: COLORS.white,
     fontWeight: '600',
+    textAlign: 'center',
   },
-  actionContainer: {
+  productsContainer: {
+    marginBottom: SPACING.md,
+  },
+  productsHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  productsScroll: {
+    marginVertical: SPACING.sm,
+  },
+  productsTitle: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.base,
+    fontWeight: 'bold',
+  },
+  reasonContainer: {
+    backgroundColor: COLORS.gray[50],
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
+    padding: SPACING.md,
+  },
+  reasonText: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
+    lineHeight: 20,
+  },
+  refreshButton: {
+    backgroundColor: COLORS.gray[50],
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.sm,
+  },
+  refreshIcon: {
+    fontSize: 20,
   },
   saveButton: {
-    flex: 1,
+    alignItems: 'center',
     backgroundColor: COLORS.gray[100],
     borderRadius: BORDER_RADIUS.md,
+    flex: 1,
     paddingVertical: SPACING.sm,
-    alignItems: 'center',
   },
   saveButtonText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text.primary,
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
   },
   shareButton: {
-    flex: 1,
+    alignItems: 'center',
     backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.md,
+    flex: 1,
     paddingVertical: SPACING.sm,
-    alignItems: 'center',
   },
   shareButtonText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.white,
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
+  },
+  statsContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  statsText: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '500',
+  },
+  subtitle: {
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '500',
+  },
+  title: {
+    color: COLORS.text.primary,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    marginBottom: SPACING.xs,
+  },
+  titleContainer: {
+    flex: 1,
   },
 });
 

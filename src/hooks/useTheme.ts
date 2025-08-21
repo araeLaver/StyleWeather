@@ -25,14 +25,10 @@ export const useTheme = (): UseThemeReturn => {
   const systemColorScheme = useColorScheme();
   const [isSystemDark, setIsSystemDark] = useState(systemColorScheme === 'dark');
 
-  // 현재 적용된 색상 스키마 계산
-  const colorScheme: ColorScheme = themeMode === 'auto' 
-    ? (systemColorScheme || 'light') 
-    : themeMode === 'dark' 
-    ? 'dark' 
-    : 'light';
+  // 현재 적용된 색상 스키마 계산 (항상 라이트모드)
+  const colorScheme: ColorScheme = 'light';
 
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = false; // 다크모드 비활성화
 
   // 테마별 색상 정의
   const colors = {
@@ -92,34 +88,34 @@ export const useTheme = (): UseThemeReturn => {
       error: '#F87171',
       info: '#60A5FA',
       
-      // 배경색
+      // 배경색 (밝게 조정)
       background: {
-        primary: '#111827',
-        secondary: '#1F2937',
-        tertiary: '#374151',
+        primary: '#2A2D3A',     // 훨씬 더 밝게
+        secondary: '#363A4A',   // 밝은 보조 배경
+        tertiary: '#424856',    // 더 밝은 삼차 배경
       },
       
-      // 텍스트 색상
+      // 텍스트 색상 (높은 대비)
       text: {
-        primary: '#F9FAFB',
-        secondary: '#D1D5DB',
-        tertiary: '#9CA3AF',
-        disabled: '#6B7280',
-        inverse: '#111827',
+        primary: '#FFFFFF',     // 완전한 흰색
+        secondary: '#E5E7EB',   // 매우 밝은 보조 텍스트
+        tertiary: '#C7C9CD',    // 밝은 삼차 텍스트
+        disabled: '#9CA3AF',    // 밝은 비활성 색상
+        inverse: '#2A2D3A',
       },
       
-      // 경계선 및 구분선
+      // 경계선 및 구분선 (구분 명확화)
       border: {
-        light: '#374151',
-        medium: '#4B5563',
-        dark: '#6B7280',
+        light: '#3A3D47',       // 더 밝은 경계선
+        medium: '#4A4F5A',      // 중간 강도
+        dark: '#5A616C',        // 강한 경계선
       },
       
-      // 카드 및 표면
+      // 카드 및 표면 (밝게 조정)
       surface: {
-        primary: '#1F2937',
-        secondary: '#374151',
-        elevated: '#374151',
+        primary: '#363A4A',     // 밝은 주 표면
+        secondary: '#424856',   // 더 밝은 보조 표면
+        elevated: '#4E5562',    // 매우 밝은 상승 표면
       },
       
       // 그림자 (다크모드에서는 더 진하게)

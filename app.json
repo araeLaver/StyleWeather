@@ -39,9 +39,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "name": "StyleWeather",
+      "name": "StyleWeather - AI 날씨 맞춤 패션 코디",
       "shortName": "StyleWeather",
-      "description": "AI 맞춤 코디 추천 서비스",
+      "description": "오늘의 날씨와 AI가 추천하는 완벽한 코디",
       "backgroundColor": "#2d3748",
       "themeColor": "#4299e1",
       "display": "standalone",

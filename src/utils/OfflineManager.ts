@@ -112,12 +112,12 @@ class OfflineManager {
 
   // 추천 데이터 캐싱
   async cacheRecommendation(weatherData: WeatherData, recommendation: StyleRecommendation): Promise<void> {
-    const key = `recommendation_${weatherData.temperature}_${weatherData.weatherCode}_${weatherData.humidity}`;
+    const key = `recommendation_${weatherData.temperature}_${weatherData.icon}_${weatherData.humidity}`;
     await this.setCache(key, recommendation, 60 * 60 * 1000); // 1시간 TTL
   }
 
   async getCachedRecommendation(weatherData: WeatherData): Promise<StyleRecommendation | null> {
-    const key = `recommendation_${weatherData.temperature}_${weatherData.weatherCode}_${weatherData.humidity}`;
+    const key = `recommendation_${weatherData.temperature}_${weatherData.icon}_${weatherData.humidity}`;
     return this.getCache<StyleRecommendation>(key);
   }
 
