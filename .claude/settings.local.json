@@ -14,7 +14,13 @@
       "Bash(npx expo start:*)",
       "Bash(npm start:*)",
       "WebFetch(domain:localhost)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run lint)",
+      "Bash(npm start)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
